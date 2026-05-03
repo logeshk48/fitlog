@@ -1,0 +1,27 @@
+/* ================================
+   APP LAYOUT
+================================ */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg-base);
+  position: relative;
+}
+
+/* ================================
+   MAIN CONTENT
+================================ */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: var(--bottom-nav-height);
+}
+
+/* ================================
+   PAGE TRANSITION
+================================ */
+.app-main > * {
+  animation: fadeIn 0.3s ease forwards;
+}

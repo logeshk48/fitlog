@@ -1,0 +1,75 @@
+/* ================================
+   BOTTOM NAV
+================================ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-sm);
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ================================
+   NAV ITEM
+================================ */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  flex: 1;
+}
+
+.nav-item:hover {
+  background: var(--bg-elevated);
+}
+
+/* ================================
+   ICON & LABEL
+================================ */
+.nav-icon {
+  font-size: 1.4rem;
+  transition: transform 0.2s ease;
+  filter: grayscale(1) opacity(0.5);
+}
+
+.nav-label {
+  font-size: 0.65rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+  letter-spacing: 0.03em;
+}
+
+/* ================================
+   ACTIVE STATE
+================================ */
+.nav-item.active .nav-icon {
+  filter: grayscale(0) opacity(1);
+  transform: translateY(-2px) scale(1.15);
+}
+
+.nav-item.active .nav-label {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.nav-item.active {
+  background: rgba(255, 107, 107, 0.08);
+}
