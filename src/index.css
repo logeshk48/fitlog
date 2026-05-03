@@ -1,0 +1,198 @@
+/* ================================
+   FONTS
+================================ */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* ================================
+   CSS VARIABLES
+================================ */
+:root {
+  /* Primary Colors */
+  --color-primary: #FF6B6B;
+  --color-secondary: #4ECDC4;
+  --color-accent: #FFE66D;
+  --color-purple: #A855F7;
+  --color-blue: #3B82F6;
+  --color-green: #22C55E;
+  --color-orange: #F97316;
+
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  --grad-secondary: linear-gradient(135deg, #4ECDC4, #3B82F6);
+  --grad-purple: linear-gradient(135deg, #A855F7, #EC4899);
+  --grad-green: linear-gradient(135deg, #22C55E, #4ECDC4);
+  --grad-energy: linear-gradient(135deg, #FFE66D, #F97316);
+
+  /* Background */
+  --bg-base: #0F0F13;
+  --bg-surface: #1A1A24;
+  --bg-card: #22222E;
+  --bg-elevated: #2A2A38;
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0B8;
+  --text-muted: #606078;
+
+  /* Border */
+  --border: #2E2E3E;
+  --border-light: #3A3A50;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-glow-red: 0 0 20px rgba(255,107,107,0.3);
+  --shadow-glow-teal: 0 0 20px rgba(78,205,196,0.3);
+  --shadow-glow-purple: 0 0 20px rgba(168,85,247,0.3);
+
+  /* Font */
+  --font-heading: 'Nunito', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+
+  /* Bottom Nav Height */
+  --bottom-nav-height: 70px;
+}
+
+/* ================================
+   RESET & BASE
+================================ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================================
+   TYPOGRAPHY
+================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1rem; }
+
+p {
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ================================
+   SCROLLBAR
+================================ */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: var(--radius-full);
+}
+
+/* ================================
+   UTILITY CLASSES
+================================ */
+.gradient-text {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.page {
+  padding: var(--space-md);
+  padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.w-full { width: 100%; }
+.text-center { text-align: center; }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+
+/* ================================
+   ANIMATIONS
+================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
