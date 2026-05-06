@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import RestTimer from './RestTimer'
 import './ActiveWorkout.css'
 
@@ -6,16 +6,14 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
   const [workoutExercises, setWorkoutExercises] = useState(
     exercises.map(ex => ({
       ...ex,
-      sets: [{ reps: '', weight: '', done: false, note: '' }]
+      sets: [{ reps: 10, weight: 0, done: false }]
     }))
   )
   const [showTimer, setShowTimer] = useState(false)
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
   const [startTime] = useState(Date.now())
   const [elapsedTime, setElapsedTime] = useState(0)
-  const [newPRs, setNewPRs] = useState([])
+  const [completedSet, setCompletedSet] = useState(null)
 
-  // Workout clock
   useEffect(() => {
     const interval = setInterval(() => {
       setElapsedTime(Math.floor((Date.now() - startTime) / 1000))
@@ -32,26 +30,27 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
   const addSet = (exIndex) => {
     setWorkoutExercises(prev => prev.map((ex, i) =>
       i === exIndex
-        ? { ...ex, sets: [...ex.sets, { reps: '', weight: '', done: false, note: '' }] }
+        ? {
+            ...ex,
+            sets: [...ex.sets, {
+              reps: ex.sets[ex.sets.length - 1].reps,
+              weight: ex.sets[ex.sets.length - 1].weight,
+              done: false
+            }]
+          }
         : ex
     ))
   }
 
-  const removeSet = (exIndex, setIndex) => {
-    setWorkoutExercises(prev => prev.map((ex, i) =>
-      i === exIndex
-        ? { ...ex, sets: ex.sets.filter((_, si) => si !== setIndex) }
-        : ex
-    ))
-  }
-
-  const updateSet = (exIndex, setIndex, field, value) => {
+  const updateValue = (exIndex, setIndex, field, delta) => {
     setWorkoutExercises(prev => prev.map((ex, i) =>
       i === exIndex
         ? {
             ...ex,
             sets: ex.sets.map((set, si) =>
-              si === setIndex ? { ...set, [field]: value } : set
+              si === setIndex
+                ? { ...set, [field]: Math.max(0, (set[field] || 0) + delta) }
+                : set
             )
           }
         : ex
@@ -69,6 +68,8 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
           }
         : ex
     ))
+    setCompletedSet(`${exIndex}-${setIndex}`)
+    setTimeout(() => setCompletedSet(null), 1000)
     setShowTimer(true)
   }
 
@@ -78,15 +79,14 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
 
   const totalVolume = workoutExercises.reduce((acc, ex) =>
     acc + ex.sets.reduce((a, s) =>
-      a + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0), 0
+      a + (s.weight || 0) * (s.reps || 0), 0
     ), 0
   )
 
   const handleFinish = () => {
-    const duration = Math.floor((Date.now() - startTime) / 1000)
     onFinish({
       exercises: workoutExercises,
-      duration,
+      duration: Math.floor((Date.now() - startTime) / 1000),
       totalVolume,
       totalSets: totalSetsCompleted,
       date: new Date().toISOString(),
@@ -106,87 +106,102 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
       {/* Stats Bar */}
       <div className="stats-bar">
         <div className="stat-item">
-          <span className="stat-value">{totalSetsCompleted}</span>
+          <span className="stat-value" style={{color: 'var(--color-primary)'}}>{totalSetsCompleted}</span>
           <span className="stat-label">Sets Done</span>
         </div>
         <div className="stat-divider" />
         <div className="stat-item">
-          <span className="stat-value">{workoutExercises.length}</span>
+          <span className="stat-value" style={{color: 'var(--color-secondary)'}}>{workoutExercises.length}</span>
           <span className="stat-label">Exercises</span>
         </div>
         <div className="stat-divider" />
         <div className="stat-item">
-          <span className="stat-value">{totalVolume.toFixed(0)}kg</span>
+          <span className="stat-value" style={{color: 'var(--color-orange)'}}>{totalVolume}kg</span>
           <span className="stat-label">Volume</span>
         </div>
       </div>
 
       {/* Rest Timer */}
-      {showTimer && (
-        <RestTimer onClose={() => setShowTimer(false)} />
-      )}
+      {showTimer && <RestTimer onClose={() => setShowTimer(false)} />}
 
-      {/* Exercise Cards */}
+      {/* Exercises */}
       <div className="exercise-logger">
         {workoutExercises.map((ex, exIndex) => (
           <div key={ex.name} className="logger-card">
 
             {/* Exercise Header */}
-            <div className="logger-header">
-              <div>
+            <div className="logger-ex-header">
+              <div className="logger-ex-info">
                 <h3 className="logger-name">{ex.name}</h3>
                 <span className={`difficulty-badge ${ex.difficulty.toLowerCase()}`}>
                   {ex.difficulty}
                 </span>
               </div>
-              <button
-                className="add-set-btn"
-                onClick={() => addSet(exIndex)}
-              >
+              <button className="add-set-btn" onClick={() => addSet(exIndex)}>
                 + Set
               </button>
             </div>
 
-            {/* Sets Table Header */}
-            <div className="sets-header">
-              <span>SET</span>
-              <span>REPS</span>
-              <span>KG</span>
-              <span>DONE</span>
-            </div>
-
             {/* Sets */}
-            {ex.sets.map((set, setIndex) => (
-              <div key={setIndex} className={`set-row ${set.done ? 'done' : ''}`}>
-                <span className="set-number">{setIndex + 1}</span>
-                <input
-                  type="number"
-                  className="set-input"
-                  placeholder="0"
-                  value={set.reps}
-                  onChange={e => updateSet(exIndex, setIndex, 'reps', e.target.value)}
-                />
-                <input
-                  type="number"
-                  className="set-input"
-                  placeholder="0"
-                  value={set.weight}
-                  onChange={e => updateSet(exIndex, setIndex, 'weight', e.target.value)}
-                />
-                <button
-                  className={`done-btn ${set.done ? 'done' : ''}`}
-                  onClick={() => completeSet(exIndex, setIndex)}
+            <div className="sets-list">
+              {ex.sets.map((set, setIndex) => (
+                <div
+                  key={setIndex}
+                  className={`set-block ${set.done ? 'done' : ''} ${completedSet === `${exIndex}-${setIndex}` ? 'pop' : ''}`}
                 >
-                  ✓
-                </button>
-              </div>
-            ))}
+                  <div className="set-label">SET {setIndex + 1}</div>
+
+                  {/* Reps */}
+                  <div className="counter-row">
+                    <span className="counter-label">REPS</span>
+                    <div className="counter">
+                      <button
+                        className="counter-btn"
+                        onClick={() => updateValue(exIndex, setIndex, 'reps', -1)}
+                      >−</button>
+                      <span className="counter-value">{set.reps}</span>
+                      <button
+                        className="counter-btn"
+                        onClick={() => updateValue(exIndex, setIndex, 'reps', 1)}
+                      >+</button>
+                    </div>
+                  </div>
+
+                  {/* Weight */}
+                  {ex.equipmentType === 'With Weight' && (
+                    <div className="counter-row">
+                      <span className="counter-label">KG</span>
+                      <div className="counter">
+                        <button
+                          className="counter-btn"
+                          onClick={() => updateValue(exIndex, setIndex, 'weight', -2.5)}
+                        >−</button>
+                        <span className="counter-value">{set.weight}</span>
+                        <button
+                          className="counter-btn"
+                          onClick={() => updateValue(exIndex, setIndex, 'weight', 2.5)}
+                        >+</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Complete Button */}
+                  <button
+                    className={`complete-set-btn ${set.done ? 'done' : ''}`}
+                    onClick={() => completeSet(exIndex, setIndex)}
+                  >
+                    {set.done ? '✓ Done!' : 'Complete Set'}
+                  </button>
+
+                </div>
+              ))}
+            </div>
 
           </div>
         ))}
       </div>
 
-      {/* Finish Button */}
+      {/* Finish Bar */}
       <div className="finish-bar">
         <button className="finish-workout-btn" onClick={handleFinish}>
           🏁 Finish Workout
