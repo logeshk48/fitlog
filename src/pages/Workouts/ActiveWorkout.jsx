@@ -106,17 +106,23 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
       {/* Stats Bar */}
       <div className="stats-bar">
         <div className="stat-item">
-          <span className="stat-value" style={{color: 'var(--color-primary)'}}>{totalSetsCompleted}</span>
+          <span className="stat-value" style={{color: 'var(--color-primary)'}}>
+            {totalSetsCompleted}
+          </span>
           <span className="stat-label">Sets Done</span>
         </div>
         <div className="stat-divider" />
         <div className="stat-item">
-          <span className="stat-value" style={{color: 'var(--color-secondary)'}}>{workoutExercises.length}</span>
+          <span className="stat-value" style={{color: 'var(--color-secondary)'}}>
+            {workoutExercises.length}
+          </span>
           <span className="stat-label">Exercises</span>
         </div>
         <div className="stat-divider" />
         <div className="stat-item">
-          <span className="stat-value" style={{color: 'var(--color-orange)'}}>{totalVolume}kg</span>
+          <span className="stat-value" style={{color: 'var(--color-orange)'}}>
+            {totalVolume}kg
+          </span>
           <span className="stat-label">Volume</span>
         </div>
       </div>
@@ -149,41 +155,48 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
                   key={setIndex}
                   className={`set-block ${set.done ? 'done' : ''} ${completedSet === `${exIndex}-${setIndex}` ? 'pop' : ''}`}
                 >
-                  <div className="set-label">SET {setIndex + 1}</div>
-
-                  {/* Reps */}
-                  <div className="counter-row">
-                    <span className="counter-label">REPS</span>
-                    <div className="counter">
-                      <button
-                        className="counter-btn"
-                        onClick={() => updateValue(exIndex, setIndex, 'reps', -1)}
-                      >−</button>
-                      <span className="counter-value">{set.reps}</span>
-                      <button
-                        className="counter-btn"
-                        onClick={() => updateValue(exIndex, setIndex, 'reps', 1)}
-                      >+</button>
-                    </div>
+                  {/* Set Top Row */}
+                  <div className="set-top-row">
+                    <span className="set-label">SET {setIndex + 1}</span>
+                    {set.done && (
+                      <span className="set-done-indicator">✓ Completed</span>
+                    )}
                   </div>
 
-                  {/* Weight */}
-                  {ex.equipmentType === 'With Weight' && (
-                    <div className="counter-row">
-                      <span className="counter-label">KG</span>
+                  {/* Side by side counters */}
+                  <div className="counters-row">
+                    <div className="counter-group">
+                      <span className="counter-label">REPS</span>
                       <div className="counter">
                         <button
                           className="counter-btn"
-                          onClick={() => updateValue(exIndex, setIndex, 'weight', -2.5)}
+                          onClick={() => updateValue(exIndex, setIndex, 'reps', -1)}
                         >−</button>
-                        <span className="counter-value">{set.weight}</span>
+                        <span className="counter-value">{set.reps}</span>
                         <button
                           className="counter-btn"
-                          onClick={() => updateValue(exIndex, setIndex, 'weight', 2.5)}
+                          onClick={() => updateValue(exIndex, setIndex, 'reps', 1)}
                         >+</button>
                       </div>
                     </div>
-                  )}
+
+                    {ex.equipmentType === 'With Weight' && (
+                      <div className="counter-group">
+                        <span className="counter-label">KG</span>
+                        <div className="counter">
+                          <button
+                            className="counter-btn"
+                            onClick={() => updateValue(exIndex, setIndex, 'weight', -2.5)}
+                          >−</button>
+                          <span className="counter-value">{set.weight}</span>
+                          <button
+                            className="counter-btn"
+                            onClick={() => updateValue(exIndex, setIndex, 'weight', 2.5)}
+                          >+</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Complete Button */}
                   <button

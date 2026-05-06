@@ -73,24 +73,24 @@
   justify-content: space-around;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
-  padding: 14px 16px;
+  padding: 10px 16px;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
 }
 
 .stat-value {
   font-family: 'Nunito', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 900;
 }
 
 .stat-label {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -99,7 +99,7 @@
 
 .stat-divider {
   width: 1px;
-  height: 32px;
+  height: 28px;
   background: var(--border);
 }
 
@@ -110,14 +110,17 @@
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
+/* ================================
+   LOGGER CARD
+================================ */
 .logger-card {
   background: var(--bg-card);
   border: 1.5px solid var(--border);
-  border-radius: 24px;
-  padding: 16px;
+  border-radius: 20px;
+  overflow: hidden;
   animation: fadeIn 0.3s ease forwards;
 }
 
@@ -125,26 +128,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.logger-ex-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .logger-name {
   font-family: 'Nunito', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 900;
   color: var(--text-primary);
-  margin-bottom: 5px;
 }
 
 .add-set-btn {
-  background: var(--bg-elevated);
+  background: transparent;
   border: 1.5px solid var(--border-light);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--text-secondary);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 7px 14px;
+  padding: 5px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -157,82 +167,105 @@
 }
 
 /* ================================
-   SET BLOCK
+   SETS LIST
 ================================ */
 .sets-list {
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
+/* ================================
+   SET BLOCK
+================================ */
 .set-block {
   background: var(--bg-surface);
   border: 1.5px solid var(--border);
-  border-radius: 18px;
-  padding: 14px;
+  border-radius: 16px;
+  padding: 12px 14px;
   transition: all 0.3s ease;
 }
 
 .set-block.done {
-  border-color: rgba(34, 197, 94, 0.4);
-  background: rgba(34, 197, 94, 0.05);
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.04);
 }
 
 @keyframes pop {
   0%   { transform: scale(1); }
-  50%  { transform: scale(1.03); }
+  40%  { transform: scale(1.04); }
   100% { transform: scale(1); }
 }
 
 .set-block.pop {
-  animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.set-label {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 12px;
-}
-
-/* ================================
-   COUNTER ROW
-================================ */
-.counter-row {
+/* Set header row */
+.set-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 
-.counter-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-secondary);
+.set-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  width: 50px;
+  letter-spacing: 0.1em;
+}
+
+.set-done-indicator {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-green);
+}
+
+/* ================================
+   COUNTERS ROW (side by side)
+================================ */
+.counters-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.counter-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.counter-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .counter {
   display: flex;
   align-items: center;
-  gap: 0;
+  width: 100%;
   background: var(--bg-elevated);
-  border-radius: 14px;
-  overflow: hidden;
+  border-radius: 12px;
   border: 1.5px solid var(--border);
+  overflow: hidden;
 }
 
 .counter-btn {
-  width: 48px;
-  height: 44px;
+  flex: 1;
+  height: 42px;
   border: none;
   background: transparent;
   color: var(--text-primary);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 300;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -242,20 +275,24 @@
 }
 
 .counter-btn:active {
-  background: rgba(255,255,255,0.08);
-  transform: scale(0.92);
+  background: rgba(255,255,255,0.07);
+  transform: scale(0.88);
 }
 
 .counter-value {
-  min-width: 60px;
+  flex: 1.2;
   text-align: center;
   font-family: 'Nunito', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 900;
   color: var(--text-primary);
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  padding: 8px 0;
+  padding: 8px 4px;
+}
+
+.set-block.done .counter-value {
+  color: var(--color-green);
 }
 
 /* ================================
@@ -263,42 +300,39 @@
 ================================ */
 .complete-set-btn {
   width: 100%;
-  padding: 13px;
-  border-radius: 14px;
-  border: 2px solid var(--border);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-family: 'Nunito', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  margin-top: 4px;
   letter-spacing: 0.02em;
 }
 
 .complete-set-btn:hover {
   border-color: var(--color-green);
   color: var(--color-green);
-  background: rgba(34, 197, 94, 0.05);
+  background: rgba(34,197,94,0.05);
 }
 
 .complete-set-btn.done {
-  background: var(--color-green);
-  border-color: var(--color-green);
+  background: linear-gradient(135deg, #22C55E, #4ECDC4);
+  border-color: transparent;
   color: white;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 4px 16px rgba(34,197,94,0.35);
 }
 
-.complete-set-btn:active {
-  transform: scale(0.97);
-}
+.complete-set-btn:active { transform: scale(0.97); }
 
 /* ================================
    DIFFICULTY BADGES
 ================================ */
 .difficulty-badge {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 99px;
@@ -307,17 +341,17 @@
 }
 
 .difficulty-badge.beginner {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(34,197,94,0.15);
   color: var(--color-green);
 }
 
 .difficulty-badge.intermediate {
-  background: rgba(249, 115, 22, 0.15);
+  background: rgba(249,115,22,0.15);
   color: var(--color-orange);
 }
 
 .difficulty-badge.advanced {
-  background: rgba(255, 107, 107, 0.15);
+  background: rgba(255,107,107,0.15);
   color: var(--color-primary);
 }
 
@@ -354,6 +388,4 @@
   box-shadow: 0 12px 32px rgba(255,107,107,0.5);
 }
 
-.finish-workout-btn:active {
-  transform: scale(0.97);
-}
+.finish-workout-btn:active { transform: scale(0.97); }
