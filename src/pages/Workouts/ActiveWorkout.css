@@ -1,0 +1,330 @@
+/* ================================
+   ACTIVE WORKOUT
+================================ */
+.active-workout {
+  min-height: 100vh;
+  background: var(--bg-base);
+  padding-bottom: 120px;
+}
+
+/* ================================
+   HEADER
+================================ */
+.active-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.workout-timer {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.finish-btn {
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.finish-btn:active {
+  transform: scale(0.95);
+}
+
+/* ================================
+   STATS BAR
+================================ */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--color-primary);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+}
+
+/* ================================
+   EXERCISE LOGGER
+================================ */
+.exercise-logger {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logger-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.logger-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.logger-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.add-set-btn {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-light);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-set-btn:hover {
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+/* ================================
+   SETS TABLE
+================================ */
+.sets-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 50px;
+  gap: 8px;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.sets-header span {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.set-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 50px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 4px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  margin-bottom: 4px;
+}
+
+.set-row.done {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.set-number {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.set-input {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 8px;
+  text-align: center;
+  width: 100%;
+  transition: all 0.2s ease;
+  -moz-appearance: textfield;
+}
+
+.set-input::-webkit-outer-spin-button,
+.set-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.set-input:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15);
+}
+
+.set-row.done .set-input {
+  border-color: rgba(34, 197, 94, 0.3);
+  color: var(--color-green);
+}
+
+/* Done button */
+.done-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.done-btn:hover {
+  border-color: var(--color-green);
+  color: var(--color-green);
+  transform: scale(1.1);
+}
+
+.done-btn.done {
+  background: var(--color-green);
+  border-color: var(--color-green);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+/* ================================
+   FINISH BAR
+================================ */
+.finish-bar {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  z-index: 50;
+}
+
+.finish-workout-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+  letter-spacing: 0.02em;
+}
+
+.finish-workout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(255, 107, 107, 0.5);
+}
+
+.finish-workout-btn:active {
+  transform: scale(0.97);
+}
+
+/* difficulty badge reuse */
+.difficulty-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.difficulty-badge.beginner {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-green);
+}
+
+.difficulty-badge.intermediate {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--color-orange);
+}
+
+.difficulty-badge.advanced {
+  background: rgba(255, 107, 107, 0.15);
+  color: var(--color-primary);
+}
