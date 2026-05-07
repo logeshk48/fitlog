@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '../../firebase'
 import { Link, useNavigate } from 'react-router-dom'
 import './Login.css'
 
 const googleProvider = new GoogleAuthProvider()
 
-function Login() {
+function Signup() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -14,15 +15,24 @@ function Login() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault()
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const result = await createUserWithEmailAndPassword(auth, email, password)
+      await updateProfile(result.user, { displayName: name })
       navigate('/')
     } catch (err) {
-      setError('Invalid email or password. Please try again.')
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Email already in use. Try logging in.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     }
     setLoading(false)
   }
@@ -60,8 +70,8 @@ function Login() {
 
         {/* Heading */}
         <div className="auth-heading">
-          <h1>Welcome back</h1>
-          <p>Track your gains. Beat your best.</p>
+          <h1>Create account</h1>
+          <p>Start tracking your fitness journey.</p>
         </div>
 
         {/* Google Button */}
@@ -85,11 +95,22 @@ function Login() {
         </div>
 
         {/* Form */}
-        <form className="auth-form" onSubmit={handleLogin}>
+        <form className="auth-form" onSubmit={handleSignup}>
 
           {error && (
             <div className="auth-error">{error}</div>
           )}
+
+          <div className="auth-field">
+            <label>Name</label>
+            <input
+              type="text"
+              placeholder="Your name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+            />
+          </div>
 
           <div className="auth-field">
             <label>Email</label>
@@ -106,7 +127,7 @@ function Login() {
             <label>Password</label>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="Min. 6 characters"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -118,15 +139,15 @@ function Login() {
             className="auth-btn"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
 
         </form>
 
         {/* Footer */}
         <p className="auth-footer">
-          Don't have an account?{' '}
-          <Link to="/signup" className="auth-link">Sign Up</Link>
+          Already have an account?{' '}
+          <Link to="/login" className="auth-link">Sign In</Link>
         </p>
 
       </div>
@@ -134,4 +155,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Signup
