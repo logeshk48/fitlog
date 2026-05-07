@@ -70,7 +70,7 @@ function Workouts() {
 
       {/* Header */}
       <div className="workouts-header">
-        <h1>💪 Build Workout</h1>
+        <h1>Build Workout</h1>
         <p className="workouts-date">
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
@@ -88,7 +88,7 @@ function Workouts() {
             className={`equipment-btn ${selectedEquipment === type ? 'active' : ''}`}
             onClick={() => setSelectedEquipment(type)}
           >
-            {type === 'With Weight' ? '🏋️ With Weight' : '🤸 Without Weight'}
+            {type === 'With Weight' ? ' With Weight' : ' Without Weight'}
           </button>
         ))}
       </div>

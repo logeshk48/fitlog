@@ -3,31 +3,33 @@
 ================================ */
 .workouts-page {
   padding: 24px 16px;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
   max-width: 480px;
   margin: 0 auto;
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn 0.4s ease forwards;
 }
 
 /* ================================
    HEADER
 ================================ */
 .workouts-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .workouts-header h1 {
   font-family: 'Nunito', sans-serif;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--text-primary);
   margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
 
 .workouts-date {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 /* ================================
@@ -35,45 +37,50 @@
 ================================ */
 .equipment-toggle {
   display: flex;
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 28px;
   background: var(--bg-surface);
-  padding: 6px;
-  border-radius: 16px;
+  padding: 5px;
+  border-radius: 18px;
   border: 1px solid var(--border);
 }
 
 .equipment-btn {
   flex: 1;
-  padding: 10px 8px;
+  padding: 11px 8px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: transparent;
   color: var(--text-muted);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.01em;
 }
 
 .equipment-btn.active {
   background: var(--grad-primary);
   color: white;
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
   transform: scale(1.02);
+}
+
+.equipment-btn:active {
+  transform: scale(0.97);
 }
 
 /* ================================
    SECTION TITLE
 ================================ */
 .section-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
   font-weight: 800;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -83,7 +90,7 @@
 .exercise-count {
   background: var(--bg-elevated);
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   padding: 2px 8px;
   border-radius: 99px;
   font-weight: 700;
@@ -93,7 +100,7 @@
    MUSCLE GROUP GRID
 ================================ */
 .muscle-section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .muscle-grid {
@@ -107,23 +114,24 @@
   border: 1.5px solid var(--border);
   border-radius: 99px;
   background: var(--bg-surface);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.01em;
 }
 
 .muscle-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.93);
 }
 
 .muscle-btn.active {
   background: var(--grad-secondary);
   border-color: transparent;
   color: white;
-  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.4);
+  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.35);
   transform: scale(1.05);
 }
 
@@ -137,25 +145,37 @@
 .exercise-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
+/* ================================
+   EXERCISE CARD
+================================ */
 .exercise-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: var(--bg-card);
   border: 1.5px solid var(--border);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 14px 16px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   animation: fadeIn 0.3s ease forwards;
+  cursor: pointer;
+}
+
+.exercise-card:active {
+  transform: scale(0.98);
 }
 
 .exercise-card.added {
-  border-color: var(--color-secondary);
-  background: rgba(78, 205, 196, 0.05);
-  box-shadow: 0 0 16px rgba(78, 205, 196, 0.1);
+  border-color: rgba(78, 205, 196, 0.4);
+  background: rgba(78, 205, 196, 0.04);
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.08);
+}
+
+.exercise-info {
+  flex: 1;
 }
 
 .exercise-info h4 {
@@ -164,41 +184,44 @@
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 6px;
+  letter-spacing: -0.01em;
 }
 
 .exercise-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
-/* Difficulty badges */
+/* ================================
+   DIFFICULTY BADGES
+================================ */
 .difficulty-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-size: 0.6rem;
+  font-weight: 800;
   padding: 2px 8px;
   border-radius: 99px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .difficulty-badge.beginner {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(34, 197, 94, 0.12);
   color: var(--color-green);
 }
 
 .difficulty-badge.intermediate {
-  background: rgba(249, 115, 22, 0.15);
+  background: rgba(249, 115, 22, 0.12);
   color: var(--color-orange);
 }
 
 .difficulty-badge.advanced {
-  background: rgba(255, 107, 107, 0.15);
+  background: rgba(255, 107, 107, 0.12);
   color: var(--color-primary);
 }
 
 .secondary-badge {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 99px;
@@ -206,34 +229,42 @@
   color: var(--text-muted);
 }
 
-/* Add button */
+/* ================================
+   ADD BUTTON
+================================ */
 .add-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid var(--border);
+  border: 1.5px solid var(--border);
   background: transparent;
   color: var(--text-muted);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-left: 12px;
 }
 
 .add-btn:hover {
   border-color: var(--color-secondary);
   color: var(--color-secondary);
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(90deg);
 }
 
 .add-btn.added {
-  background: var(--color-secondary);
-  border-color: var(--color-secondary);
+  background: linear-gradient(135deg, #4ECDC4, #3B82F6);
+  border-color: transparent;
   color: white;
   transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(78, 205, 196, 0.45);
+}
+
+.add-btn:active {
+  transform: scale(0.9);
 }
 
 /* ================================
@@ -246,21 +277,27 @@
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 448px;
-  background: var(--bg-elevated);
+  background: rgba(26, 26, 36, 0.95);
   border: 1px solid var(--border-light);
-  border-radius: 20px;
-  padding: 12px 12px 12px 20px;
+  border-radius: 22px;
+  padding: 10px 10px 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  backdrop-filter: blur(20px);
   animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   z-index: 50;
 }
 
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+
 .selected-count {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -270,20 +307,21 @@
   color: white;
   border: none;
   border-radius: 14px;
-  padding: 12px 24px;
+  padding: 13px 24px;
   font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 800;
+  font-size: 0.92rem;
+  font-weight: 900;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.45);
+  letter-spacing: 0.01em;
 }
 
 .start-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 24px rgba(255, 107, 107, 0.5);
+  transform: scale(1.04);
+  box-shadow: 0 6px 24px rgba(255, 107, 107, 0.55);
 }
 
 .start-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }

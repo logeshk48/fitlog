@@ -186,12 +186,12 @@ function ActiveWorkout({ exercises, onFinish, onBack }) {
                         <div className="counter">
                           <button
                             className="counter-btn"
-                            onClick={() => updateValue(exIndex, setIndex, 'weight', -2.5)}
+                            onClick={() => updateValue(exIndex, setIndex, 'weight', -0.5)}
                           >−</button>
                           <span className="counter-value">{set.weight}</span>
                           <button
                             className="counter-btn"
-                            onClick={() => updateValue(exIndex, setIndex, 'weight', 2.5)}
+                            onClick={() => updateValue(exIndex, setIndex, 'weight', 0.5)}
                           >+</button>
                         </div>
                       </div>
