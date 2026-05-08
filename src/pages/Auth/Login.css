@@ -17,7 +17,7 @@
       rgba(10, 10, 14, 0.95) 100%
     ),
     url('/src/assets/auth-bg.jpg') center center/cover no-repeat fixed;
-  animation: bgReveal 1s ease forwards;
+  animation: bgReveal 0.6s ease forwards;
 }
 
 @keyframes bgReveal {
@@ -48,7 +48,7 @@
   max-width: 380px;
   position: relative;
   z-index: 1;
-  animation: contentReveal 0.6s ease 1s both;
+  animation: contentReveal 0.6s ease 0.6s both;
 }
 
 @keyframes contentReveal {
