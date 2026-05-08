@@ -1,3 +1,4 @@
+import logo from '../../assets/logo.svg'
 import { useState } from 'react'
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '../../firebase'
@@ -54,8 +55,7 @@ function Login() {
 
         {/* Logo */}
         <div className="auth-logo">
-          <div className="auth-logo-icon">F</div>
-          <span className="auth-logo-text">FitLog</span>
+          <img src={logo} alt="FitLog" className="auth-logo-img"/>
         </div>
 
         {/* Heading */}

@@ -68,9 +68,13 @@
 .auth-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 40px;
   justify-content: center;
+  margin-bottom: 32px;
+}
+
+.auth-logo-img {
+  width: 260px;
+  height: auto;
 }
 
 .auth-logo-icon {
