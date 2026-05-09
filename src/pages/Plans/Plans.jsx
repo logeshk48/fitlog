@@ -30,6 +30,7 @@ function Plans() {
   const [planName, setPlanName] = useState('')
   const [schedule, setSchedule] = useState(defaultSchedule())
   const [saving, setSaving] = useState(false)
+  const [expandedPlan, setExpandedPlan] = useState(null)
 
   useEffect(() => { fetchPlans() }, [])
 
@@ -100,14 +101,14 @@ function Plans() {
           createdAt: serverTimestamp()
         })
       }
-    await fetchPlans()
-    resetForm()
-  } catch (err) {
-    console.error('Save error:', err)
-    alert('Error saving plan: ' + err.message)
+      await fetchPlans()
+      resetForm()
+    } catch (err) {
+      console.error('Save error:', err)
+      alert('Error: ' + err.message)
+    }
+    setSaving(false)
   }
-  setSaving(false)
-}
 
   const setActive = async (planId) => {
     try {
@@ -121,6 +122,7 @@ function Plans() {
   }
 
   const deletePlan = async (planId) => {
+    if (!window.confirm('Delete this plan?')) return
     try {
       await deleteDoc(doc(db, 'plans', planId))
       await fetchPlans()
@@ -157,6 +159,8 @@ function Plans() {
     }
     return 'Not set'
   }
+
+  const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
 
   // ================================
   // CREATE / EDIT SCREEN
@@ -271,72 +275,114 @@ function Plans() {
         </div>
       ) : (
         <div className="plans-list">
-          {plans.map(plan => {
-            const today = getTodayMuscles(plan)
-            return (
-              <div key={plan.id} className={`plan-card ${plan.isActive ? 'active' : ''}`}>
-
-                {/* Header */}
-                <div className="plan-card-header">
-                  <div>
-                    <h3 className="plan-name">{plan.name}</h3>
-                    {plan.isActive && (
-                      <span className="active-badge">Active</span>
-                    )}
+          {[...plans]
+            .sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0))
+            .map(plan => {
+              const today = getTodayMuscles(plan)
+              const isExpanded = expandedPlan === plan.id
+              return (
+                <div
+                  key={plan.id}
+                  className={`plan-card ${plan.isActive ? 'active' : ''} ${isExpanded ? 'expanded' : ''}`}
+                >
+                  {/* Header - clickable to expand */}
+                  <div
+                    className="plan-card-header"
+                    onClick={() => setExpandedPlan(isExpanded ? null : plan.id)}
+                  >
+                    <div>
+                      <h3 className="plan-name">{plan.name}</h3>
+                      {plan.isActive && (
+                        <span className="active-badge">● Active</span>
+                      )}
+                    </div>
+                    <div className="plan-actions" onClick={e => e.stopPropagation()}>
+                      <button className="edit-btn" onClick={() => openEdit(plan)}>Edit</button>
+                      <button className="delete-btn" onClick={() => deletePlan(plan.id)}>Delete</button>
+                    </div>
                   </div>
-                  <div className="plan-actions">
-                    <button className="edit-btn" onClick={() => openEdit(plan)}>Edit</button>
-                    <button className="delete-btn" onClick={() => deletePlan(plan.id)}>Delete</button>
+
+                  {/* Today's focus */}
+                  <div className="today-focus">
+                    <span className="focus-label">Today →</span>
+                    <div className="focus-content">
+                      {today.isRest ? (
+                        <span className="focus-rest">Rest Day</span>
+                      ) : today.primary ? (
+                        <>
+                          <span className="focus-primary">{today.primary}</span>
+                          {today.secondary?.length > 0 && (
+                            <span className="focus-secondary">
+                              + {today.secondary.join(', ')}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="focus-empty">Not set</span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Today's focus */}
-                <div className="today-focus">
-                  <span className="focus-label">Today →</span>
-                  <div className="focus-content">
-                    {today.isRest ? (
-                      <span className="focus-rest">Rest Day</span>
-                    ) : today.primary ? (
-                      <>
-                        <span className="focus-primary">{today.primary}</span>
-                        {today.secondary?.length > 0 && (
-                          <span className="focus-secondary">
-                            + {today.secondary.join(', ')}
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="focus-empty">Not set</span>
-                    )}
+                  {/* Week overview */}
+                  <div className="week-overview">
+                    {FULL_DAYS.map((day, i) => {
+                      const d = plan.schedule?.[day]
+                      const isRest = d?.isRest
+                      const hasWorkout = d?.primary
+                      const isToday = todayIndex === i
+                      return (
+                        <div key={day} className={`day-dot ${isToday ? 'today' : ''}`}>
+                          <div className={`dot ${isRest ? 'rest' : hasWorkout ? 'active' : 'empty'}`} />
+                          <span className="dot-label">{DAYS[i]}</span>
+                        </div>
+                      )
+                    })}
                   </div>
+
+                  {/* Expanded Schedule */}
+                  {isExpanded && (
+                    <div className="expanded-schedule">
+                      {FULL_DAYS.map((day, i) => {
+                        const d = plan.schedule?.[day]
+                        const isToday = todayIndex === i
+                        return (
+                          <div key={day} className={`schedule-row ${isToday ? 'today-row' : ''}`}>
+                            <span className="schedule-day">{DAYS[i]}</span>
+                            <div className="schedule-muscles">
+                              {d?.isRest ? (
+                                <span className="schedule-rest">Rest</span>
+                              ) : d?.primary ? (
+                                <>
+                                  <span className="schedule-primary">{d.primary}</span>
+                                  {d.secondary?.length > 0 && (
+                                    <span className="schedule-secondary">
+                                      + {d.secondary.join(', ')}
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="schedule-empty">—</span>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Set Active */}
+                  {!plan.isActive && (
+                    <button
+                      className="set-active-btn"
+                      onClick={() => setActive(plan.id)}
+                    >
+                      Set as Active
+                    </button>
+                  )}
+
                 </div>
-
-                {/* Week overview */}
-                <div className="week-overview">
-                  {FULL_DAYS.map((day, i) => {
-                    const d = plan.schedule?.[day]
-                    const isRest = d?.isRest
-                    const hasWorkout = d?.primary
-                    const isToday = (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) === i
-                    return (
-                      <div key={day} className={`day-dot ${isToday ? 'today' : ''}`}>
-                        <div className={`dot ${isRest ? 'rest' : hasWorkout ? 'active' : 'empty'}`} />
-                        <span className="dot-label">{DAYS[i]}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* Set Active */}
-                {!plan.isActive && (
-                  <button className="set-active-btn" onClick={() => setActive(plan.id)}>
-                    Set as Active
-                  </button>
-                )}
-
-              </div>
-            )
-          })}
+              )
+            })}
         </div>
       )}
     </div>
