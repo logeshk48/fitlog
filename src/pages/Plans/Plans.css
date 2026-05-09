@@ -1,0 +1,474 @@
+/* ================================
+   PLANS PAGE
+================================ */
+.plans-page {
+  padding: 24px 16px;
+  padding-bottom: 120px;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ================================
+   HEADER
+================================ */
+.plans-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.plans-header h1 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.new-plan-btn {
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 16px rgba(255,107,107,0.4);
+}
+
+.new-plan-btn:hover {
+  transform: scale(1.05);
+}
+
+.new-plan-btn:active {
+  transform: scale(0.95);
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.back-btn:active {
+  transform: scale(0.9);
+}
+
+.save-plan-btn {
+  background: var(--grad-secondary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(78,205,196,0.4);
+}
+
+.save-plan-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ================================
+   PLAN NAME INPUT
+================================ */
+.plan-name-input {
+  margin-bottom: 24px;
+}
+
+.name-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 14px 18px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.name-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255,107,107,0.12);
+}
+
+.name-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ================================
+   SCHEDULE BUILDER
+================================ */
+.schedule-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.day-block {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 14px;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.day-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.day-short {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 36px;
+}
+
+.day-muscles-preview {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.muscle-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.muscle-chip {
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.muscle-chip:active {
+  transform: scale(0.93);
+}
+
+.muscle-chip.active {
+  background: var(--grad-secondary);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 3px 12px rgba(78,205,196,0.35);
+  transform: scale(1.05);
+}
+
+.muscle-chip.rest.active {
+  background: var(--bg-elevated);
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.muscle-chip.cardio.active {
+  background: var(--grad-energy);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 3px 12px rgba(249,115,22,0.35);
+}
+
+/* ================================
+   EMPTY STATE
+================================ */
+.plans-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+}
+
+.plans-empty h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.plans-empty p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.create-first-btn {
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 28px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+}
+
+.create-first-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ================================
+   PLANS LIST
+================================ */
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ================================
+   PLAN CARD
+================================ */
+.plan-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 18px;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.plan-card.active {
+  border-color: rgba(255,107,107,0.4);
+  background: rgba(255,107,107,0.03);
+  box-shadow: 0 0 24px rgba(255,107,107,0.08);
+}
+
+.plan-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.plan-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.active-badge {
+  display: inline-block;
+  background: var(--grad-primary);
+  color: white;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.plan-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+.delete-btn {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ================================
+   TODAY FOCUS
+================================ */
+.today-focus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.focus-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.focus-muscles {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+/* ================================
+   WEEK OVERVIEW
+================================ */
+.week-overview {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.day-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
+  transition: all 0.2s ease;
+}
+
+.dot.active {
+  background: var(--grad-secondary);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(78,205,196,0.4);
+}
+
+.dot.rest {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+
+.dot.cardio {
+  background: var(--grad-energy);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(249,115,22,0.4);
+}
+
+.day-dot.today .dot {
+  border: 2px solid var(--color-primary);
+}
+
+.dot-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.day-dot.today .dot-label {
+  color: var(--color-primary);
+}
+
+/* ================================
+   SET ACTIVE BUTTON
+================================ */
+.set-active-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.set-active-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(255,107,107,0.05);
+}
+
+.set-active-btn:active {
+  transform: scale(0.97);
+}
+
+/* ================================
+   LOADING
+================================ */
+.plans-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+}
