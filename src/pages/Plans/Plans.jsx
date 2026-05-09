@@ -58,14 +58,14 @@ function Plans() {
 
   const toggleSecondary = (day, muscle) => {
     setSchedule(prev => {
-      const current = prev[day]?.secondary || []
+      const current = Array.isArray(prev[day]?.secondary) ? prev[day].secondary : []
       return {
         ...prev,
         [day]: {
           ...prev[day],
           secondary: current.includes(muscle)
-            ? current.filter(m => m !== muscle)
-            : [...current, muscle]
+          ? current.filter(m => m !== muscle)
+          : [...current, muscle]
         }
       }
     })
@@ -147,7 +147,12 @@ function Plans() {
     const dayIndex = new Date().getDay()
     const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
     const today = FULL_DAYS[adjustedIndex]
-    return plan.schedule?.[today] || { primary: '', secondary: [], isRest: false }
+    const d = plan.schedule?.[today]
+    return {
+      primary: d?.primary || '',
+      secondary: Array.isArray(d?.secondary) ? d.secondary : [],
+      isRest: d?.isRest || false
+    }
   }
 
   const getDayPreview = (day) => {
