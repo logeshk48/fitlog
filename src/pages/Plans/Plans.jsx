@@ -12,11 +12,14 @@ const FULL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satu
 
 const MUSCLE_OPTIONS = [
   'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps',
-  'Forearms', 'Core', 'Legs', 'Glutes', 'Calves', 'Full Body', 'Cardio', 'Rest'
+  'Forearms', 'Core', 'Legs', 'Glutes', 'Calves', 'Full Body', 'Cardio'
 ]
 
 const defaultSchedule = () =>
-  FULL_DAYS.reduce((acc, day) => ({ ...acc, [day]: [] }), {})
+  FULL_DAYS.reduce((acc, day) => ({
+    ...acc,
+    [day]: { primary: '', secondary: [], isRest: false }
+  }), {})
 
 function Plans() {
   const { user } = useContext(AuthContext)
@@ -28,9 +31,7 @@ function Plans() {
   const [schedule, setSchedule] = useState(defaultSchedule())
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    fetchPlans()
-  }, [])
+  useEffect(() => { fetchPlans() }, [])
 
   const fetchPlans = async () => {
     if (!user) return
@@ -38,26 +39,46 @@ function Plans() {
     try {
       const q = query(collection(db, 'plans'), where('userId', '==', user.uid))
       const snapshot = await getDocs(q)
-      setPlans(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-    } catch (err) {
-      console.error(err)
-    }
+      setPlans(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
+    } catch (err) { console.error(err) }
     setLoading(false)
   }
 
-  const toggleMuscle = (day, muscle) => {
+  const togglePrimary = (day, muscle) => {
+    setSchedule(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        primary: prev[day]?.primary === muscle ? '' : muscle,
+        secondary: prev[day]?.secondary || []
+      }
+    }))
+  }
+
+  const toggleSecondary = (day, muscle) => {
     setSchedule(prev => {
-      const current = prev[day] || []
-      if (muscle === 'Rest') return { ...prev, [day]: ['Rest'] }
-      if (muscle === 'Cardio') return { ...prev, [day]: ['Cardio'] }
-      const filtered = current.filter(m => m !== 'Rest' && m !== 'Cardio')
+      const current = prev[day]?.secondary || []
       return {
         ...prev,
-        [day]: filtered.includes(muscle)
-          ? filtered.filter(m => m !== muscle)
-          : [...filtered, muscle]
+        [day]: {
+          ...prev[day],
+          secondary: current.includes(muscle)
+            ? current.filter(m => m !== muscle)
+            : [...current, muscle]
+        }
       }
     })
+  }
+
+  const toggleRest = (day) => {
+    setSchedule(prev => ({
+      ...prev,
+      [day]: {
+        primary: '',
+        secondary: [],
+        isRest: !prev[day]?.isRest
+      }
+    }))
   }
 
   const savePlan = async () => {
@@ -79,13 +100,14 @@ function Plans() {
           createdAt: serverTimestamp()
         })
       }
-      await fetchPlans()
-      resetForm()
-    } catch (err) {
-      console.error(err)
-    }
-    setSaving(false)
+    await fetchPlans()
+    resetForm()
+  } catch (err) {
+    console.error('Save error:', err)
+    alert('Error saving plan: ' + err.message)
   }
+  setSaving(false)
+}
 
   const setActive = async (planId) => {
     try {
@@ -95,18 +117,14 @@ function Plans() {
         })
       }
       await fetchPlans()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const deletePlan = async (planId) => {
     try {
       await deleteDoc(doc(db, 'plans', planId))
       await fetchPlans()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const openEdit = (plan) => {
@@ -127,9 +145,22 @@ function Plans() {
     const dayIndex = new Date().getDay()
     const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
     const today = FULL_DAYS[adjustedIndex]
-    return plan.schedule?.[today] || []
+    return plan.schedule?.[today] || { primary: '', secondary: [], isRest: false }
   }
 
+  const getDayPreview = (day) => {
+    const d = schedule[day]
+    if (d?.isRest) return 'Rest Day'
+    if (d?.primary) {
+      const sec = d.secondary?.length > 0 ? ` + ${d.secondary.join(', ')}` : ''
+      return `${d.primary}${sec}`
+    }
+    return 'Not set'
+  }
+
+  // ================================
+  // CREATE / EDIT SCREEN
+  // ================================
   if (showCreate) {
     return (
       <div className="plans-page">
@@ -160,25 +191,54 @@ function Plans() {
         <div className="schedule-builder">
           {FULL_DAYS.map((day, i) => (
             <div key={day} className="day-block">
+
+              {/* Day header */}
               <div className="day-label">
                 <span className="day-short">{DAYS[i]}</span>
-                <span className="day-muscles-preview">
-                  {schedule[day]?.length > 0
-                    ? schedule[day].join(' + ')
-                    : 'Not set'}
-                </span>
+                <span className="day-muscles-preview">{getDayPreview(day)}</span>
               </div>
-              <div className="muscle-chips">
-                {MUSCLE_OPTIONS.map(muscle => (
-                  <button
-                    key={muscle}
-                    className={`muscle-chip ${schedule[day]?.includes(muscle) ? 'active' : ''} ${muscle === 'Rest' ? 'rest' : ''} ${muscle === 'Cardio' ? 'cardio' : ''}`}
-                    onClick={() => toggleMuscle(day, muscle)}
-                  >
-                    {muscle}
-                  </button>
-                ))}
-              </div>
+
+              {/* Rest toggle */}
+              <button
+                className={`rest-toggle ${schedule[day]?.isRest ? 'active' : ''}`}
+                onClick={() => toggleRest(day)}
+              >
+                {schedule[day]?.isRest ? '✓ Rest Day' : 'Mark as Rest'}
+              </button>
+
+              {!schedule[day]?.isRest && (
+                <>
+                  {/* Primary */}
+                  <div className="muscle-section-label">Primary Muscle</div>
+                  <div className="muscle-chips">
+                    {MUSCLE_OPTIONS.map(muscle => (
+                      <button
+                        key={muscle}
+                        className={`muscle-chip primary-chip ${schedule[day]?.primary === muscle ? 'active' : ''}`}
+                        onClick={() => togglePrimary(day, muscle)}
+                      >
+                        {muscle}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Secondary */}
+                  <div className="muscle-section-label">Secondary Muscles</div>
+                  <div className="muscle-chips">
+                    {MUSCLE_OPTIONS
+                      .filter(m => m !== schedule[day]?.primary)
+                      .map(muscle => (
+                        <button
+                          key={muscle}
+                          className={`muscle-chip secondary-chip ${schedule[day]?.secondary?.includes(muscle) ? 'active' : ''}`}
+                          onClick={() => toggleSecondary(day, muscle)}
+                        >
+                          {muscle}
+                        </button>
+                      ))}
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -186,9 +246,11 @@ function Plans() {
     )
   }
 
+  // ================================
+  // PLANS LIST SCREEN
+  // ================================
   return (
     <div className="plans-page">
-      {/* Header */}
       <div className="plans-header">
         <h1>My Plans</h1>
         <button className="new-plan-btn" onClick={() => setShowCreate(true)}>
@@ -196,7 +258,6 @@ function Plans() {
         </button>
       </div>
 
-      {/* Plans List */}
       {loading ? (
         <div className="plans-loading">Loading...</div>
       ) : plans.length === 0 ? (
@@ -210,61 +271,72 @@ function Plans() {
         </div>
       ) : (
         <div className="plans-list">
-          {plans.map(plan => (
-            <div key={plan.id} className={`plan-card ${plan.isActive ? 'active' : ''}`}>
+          {plans.map(plan => {
+            const today = getTodayMuscles(plan)
+            return (
+              <div key={plan.id} className={`plan-card ${plan.isActive ? 'active' : ''}`}>
 
-              {/* Plan Header */}
-              <div className="plan-card-header">
-                <div>
-                  <h3 className="plan-name">{plan.name}</h3>
-                  {plan.isActive && (
-                    <span className="active-badge">Active</span>
-                  )}
+                {/* Header */}
+                <div className="plan-card-header">
+                  <div>
+                    <h3 className="plan-name">{plan.name}</h3>
+                    {plan.isActive && (
+                      <span className="active-badge">Active</span>
+                    )}
+                  </div>
+                  <div className="plan-actions">
+                    <button className="edit-btn" onClick={() => openEdit(plan)}>Edit</button>
+                    <button className="delete-btn" onClick={() => deletePlan(plan.id)}>Delete</button>
+                  </div>
                 </div>
-                <div className="plan-actions">
-                  <button className="edit-btn" onClick={() => openEdit(plan)}>Edit</button>
-                  <button className="delete-btn" onClick={() => deletePlan(plan.id)}>Delete</button>
+
+                {/* Today's focus */}
+                <div className="today-focus">
+                  <span className="focus-label">Today →</span>
+                  <div className="focus-content">
+                    {today.isRest ? (
+                      <span className="focus-rest">Rest Day</span>
+                    ) : today.primary ? (
+                      <>
+                        <span className="focus-primary">{today.primary}</span>
+                        {today.secondary?.length > 0 && (
+                          <span className="focus-secondary">
+                            + {today.secondary.join(', ')}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="focus-empty">Not set</span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Week overview */}
+                <div className="week-overview">
+                  {FULL_DAYS.map((day, i) => {
+                    const d = plan.schedule?.[day]
+                    const isRest = d?.isRest
+                    const hasWorkout = d?.primary
+                    const isToday = (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) === i
+                    return (
+                      <div key={day} className={`day-dot ${isToday ? 'today' : ''}`}>
+                        <div className={`dot ${isRest ? 'rest' : hasWorkout ? 'active' : 'empty'}`} />
+                        <span className="dot-label">{DAYS[i]}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Set Active */}
+                {!plan.isActive && (
+                  <button className="set-active-btn" onClick={() => setActive(plan.id)}>
+                    Set as Active
+                  </button>
+                )}
+
               </div>
-
-              {/* Today's focus */}
-              <div className="today-focus">
-                <span className="focus-label">Today →</span>
-                <span className="focus-muscles">
-                  {getTodayMuscles(plan).length > 0
-                    ? getTodayMuscles(plan).join(' + ')
-                    : 'Not set'}
-                </span>
-              </div>
-
-              {/* Week overview */}
-              <div className="week-overview">
-                {FULL_DAYS.map((day, i) => {
-                  const muscles = plan.schedule?.[day] || []
-                  const isRest = muscles.includes('Rest')
-                  const isCardio = muscles.includes('Cardio')
-                  const isToday = (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) === i
-                  return (
-                    <div key={day} className={`day-dot ${isToday ? 'today' : ''}`}>
-                      <div className={`dot ${isRest ? 'rest' : isCardio ? 'cardio' : muscles.length > 0 ? 'active' : 'empty'}`} />
-                      <span className="dot-label">{DAYS[i]}</span>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Set Active */}
-              {!plan.isActive && (
-                <button
-                  className="set-active-btn"
-                  onClick={() => setActive(plan.id)}
-                >
-                  Set as Active
-                </button>
-              )}
-
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
