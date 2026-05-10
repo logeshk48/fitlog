@@ -1,0 +1,511 @@
+/* ================================
+   DASHBOARD
+================================ */
+.dashboard {
+  padding: 24px 16px;
+  padding-bottom: 120px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ================================
+   STAGGERED ANIMATIONS
+================================ */
+.animate-1 { animation: fadeIn 0.4s ease 0.0s both; }
+.animate-2 { animation: fadeIn 0.4s ease 0.1s both; }
+.animate-3 { animation: fadeIn 0.4s ease 0.2s both; }
+.animate-4 { animation: fadeIn 0.4s ease 0.3s both; }
+.animate-5 { animation: fadeIn 0.4s ease 0.4s both; }
+.animate-6 { animation: fadeIn 0.4s ease 0.5s both; }
+
+/* ================================
+   LOADING
+================================ */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  gap: 16px;
+}
+
+.loading-pulse {
+  font-size: 3rem;
+  animation: pulse 1.5s ease infinite;
+}
+
+.dashboard-loading p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ================================
+   GREETING
+================================ */
+.greeting-section {
+  margin-bottom: 24px;
+}
+
+.greeting-time {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.greeting-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+
+.greeting-date {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ================================
+   STREAK CARD
+================================ */
+.streak-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.streak-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-primary);
+}
+
+.streak-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.streak-fire {
+  font-size: 2rem;
+  animation: pulse 2s ease infinite;
+}
+
+.streak-number {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.streak-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.streak-bar-wrap {
+  flex: 1;
+  max-width: 140px;
+}
+
+.streak-bar {
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.streak-fill {
+  height: 100%;
+  background: var(--grad-primary);
+  border-radius: 99px;
+  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(255,107,107,0.5);
+}
+
+.streak-goal {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* ================================
+   TODAY'S FOCUS CARD
+================================ */
+.today-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.today-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-secondary);
+}
+
+.today-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.today-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.plan-name-tag {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}
+
+/* No plan */
+.no-plan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.no-plan p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.create-plan-btn {
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(255,107,107,0.3);
+}
+
+.create-plan-btn:active { transform: scale(0.95); }
+
+/* Rest day */
+.rest-day {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rest-emoji {
+  font-size: 2rem;
+}
+
+.rest-day h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--color-green);
+  margin-bottom: 2px;
+}
+
+.rest-day p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Focus muscles */
+.focus-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.focus-muscles {
+  display: flex;
+  gap: 10px;
+}
+
+.focus-primary-card {
+  flex: 1;
+  background: rgba(255,107,107,0.08);
+  border: 1px solid rgba(255,107,107,0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.focus-secondary-card {
+  flex: 1;
+  background: rgba(78,205,196,0.08);
+  border: 1px solid rgba(78,205,196,0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.focus-muscle-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.focus-muscle-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.focus-primary-card .focus-muscle-name {
+  color: var(--color-primary);
+}
+
+.focus-secondary-card .focus-muscle-name {
+  color: var(--color-secondary);
+  font-size: 0.85rem;
+}
+
+.not-set {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Start Workout Button */
+.start-workout-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+  animation: pulse 2.5s ease infinite;
+  letter-spacing: 0.01em;
+}
+
+.start-workout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255,107,107,0.5);
+  animation: none;
+}
+
+.start-workout-btn:active { transform: scale(0.97); }
+
+/* ================================
+   THIS WEEK CARD
+================================ */
+.week-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.week-dots {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.week-dot.done {
+  background: linear-gradient(135deg, #22C55E, #4ECDC4);
+  border-color: transparent;
+  box-shadow: 0 3px 10px rgba(34,197,94,0.4);
+  transform: scale(1.1);
+}
+
+.week-dot.today {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 12px rgba(255,107,107,0.4);
+  transform: scale(1.15);
+}
+
+.week-dot.done.today {
+  background: linear-gradient(135deg, #22C55E, #4ECDC4);
+  border: 2px solid var(--color-primary);
+  transform: scale(1.15);
+}
+
+.week-day-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.week-day.today .week-day-label {
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
+/* ================================
+   QUICK STATS
+================================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.stat-box:nth-child(1) {
+  border-top: 3px solid var(--color-primary);
+}
+
+.stat-box:nth-child(2) {
+  border-top: 3px solid var(--color-secondary);
+}
+
+.stat-box:nth-child(3) {
+  border-top: 3px solid var(--color-purple);
+}
+
+.stat-box-value {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-box:nth-child(1) .stat-box-value { color: var(--color-primary); }
+.stat-box:nth-child(2) .stat-box-value { color: var(--color-secondary); }
+.stat-box:nth-child(3) .stat-box-value { color: var(--color-purple); }
+
+.stat-box-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* ================================
+   INSIGHT CARD
+================================ */
+.insight-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg,
+    rgba(168,85,247,0.06),
+    rgba(78,205,196,0.06)
+  );
+  border-color: rgba(168,85,247,0.2);
+}
+
+.insight-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.insight-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
