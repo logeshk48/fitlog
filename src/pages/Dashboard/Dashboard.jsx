@@ -23,15 +23,12 @@ function Dashboard() {
     topMuscle: ''
   })
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
     if (!user) return
     setLoading(true)
     try {
-      // Fetch active plan
       const planQ = query(
         collection(db, 'plans'),
         where('userId', '==', user.uid),
@@ -42,7 +39,6 @@ function Dashboard() {
         setActivePlan({ id: planSnap.docs[0].id, ...planSnap.docs[0].data() })
       }
 
-      // Fetch workouts
       const workoutQ = query(
         collection(db, 'workouts'),
         where('userId', '==', user.uid),
@@ -52,15 +48,9 @@ function Dashboard() {
       const allWorkouts = workoutSnap.docs.map(d => ({ id: d.id, ...d.data() }))
       setWorkouts(allWorkouts)
 
-      // Calculate streak
       calculateStreak(allWorkouts)
-
-      // Calculate week workouts
       calculateWeekWorkouts(allWorkouts)
-
-      // Calculate stats
       calculateStats(allWorkouts)
-
     } catch (err) {
       console.error(err)
     }
@@ -72,7 +62,6 @@ function Dashboard() {
     let streak = 0
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-
     for (let i = 0; i < 30; i++) {
       const date = new Date(today)
       date.setDate(today.getDate() - i)
@@ -81,11 +70,8 @@ function Dashboard() {
         const wDate = w.createdAt?.toDate?.() || new Date(w.date)
         return wDate.toDateString() === dateStr
       })
-      if (hasWorkout) {
-        streak++
-      } else if (i > 0) {
-        break
-      }
+      if (hasWorkout) { streak++ }
+      else if (i > 0) { break }
     }
     setStreak(streak)
   }
@@ -94,13 +80,10 @@ function Dashboard() {
     const week = []
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-
-    // Get Monday of current week
     const monday = new Date(today)
     const day = today.getDay()
     const diff = day === 0 ? -6 : 1 - day
     monday.setDate(today.getDate() + diff)
-
     for (let i = 0; i < 7; i++) {
       const date = new Date(monday)
       date.setDate(monday.getDate() + i)
@@ -119,35 +102,23 @@ function Dashboard() {
     let bestLift = 0
     let weekVolume = 0
     const muscleCounts = {}
-
     const oneWeekAgo = new Date()
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-
     allWorkouts.forEach(workout => {
       const wDate = workout.createdAt?.toDate?.() || new Date(workout.date)
       const isThisWeek = wDate > oneWeekAgo
-
       workout.exercises?.forEach(ex => {
-        // Top muscle
         if (ex.muscleGroup) {
           muscleCounts[ex.muscleGroup] = (muscleCounts[ex.muscleGroup] || 0) + 1
         }
-
         ex.sets?.forEach(set => {
-          // Best lift
           if (set.weight > bestLift) bestLift = set.weight
-
-          // Week volume
-          if (isThisWeek) {
-            weekVolume += (set.weight || 0) * (set.reps || 0)
-          }
+          if (isThisWeek) weekVolume += (set.weight || 0) * (set.reps || 0)
         })
       })
     })
-
     const topMuscle = Object.entries(muscleCounts)
       .sort((a, b) => b[1] - a[1])[0]?.[0] || ''
-
     setStats({ total, bestLift, weekVolume: Math.round(weekVolume), topMuscle })
   }
 
@@ -158,9 +129,7 @@ function Dashboard() {
     return 'Good Evening'
   }
 
-  const getFirstName = () => {
-    return user?.displayName?.split(' ')[0] || 'Champ'
-  }
+  const getFirstName = () => user?.displayName?.split(' ')[0] || 'Champ'
 
   const getTodayFocus = () => {
     if (!activePlan) return null
@@ -280,7 +249,13 @@ function Dashboard() {
             </div>
             <button
               className="start-workout-btn"
-              onClick={() => navigate('/workouts')}
+              onClick={() => navigate('/workouts', {
+                state: {
+                  preselectedMuscle: todayFocus?.primary,
+                  preselectedSecondary: todayFocus?.secondary || [],
+                  preselectedEquipment: 'With Weight'
+                }
+              })}
             >
               Start Workout →
             </button>

@@ -9,6 +9,30 @@ function Workouts() {
   const location = useLocation()
   const preselected = location.state
 
+  const getPreselectedExercises = () => {
+    if (!preselected?.preselectedMuscle) return []
+
+    const primaryExercises = exercises
+      .filter(ex =>
+        ex.muscleGroup === preselected.preselectedMuscle &&
+        ex.equipmentType === (preselected.preselectedEquipment || 'With Weight')
+      )
+      .map(ex => ({ ...ex, sets: [{ reps: 10, weight: 0, done: false }] }))
+
+    const secondaryExercises = (preselected.preselectedSecondary || [])
+      .flatMap(muscle =>
+        exercises
+          .filter(ex =>
+            ex.muscleGroup === muscle &&
+            ex.equipmentType === (preselected.preselectedEquipment || 'With Weight')
+          )
+          .slice(0, 2)
+          .map(ex => ({ ...ex, sets: [{ reps: 10, weight: 0, done: false }] }))
+      )
+
+    return [...primaryExercises, ...secondaryExercises]
+  }
+
   const [screen, setScreen] = useState('select')
   const [selectedEquipment, setSelectedEquipment] = useState(
     preselected?.preselectedEquipment || 'With Weight'
@@ -16,7 +40,7 @@ function Workouts() {
   const [selectedMuscle, setSelectedMuscle] = useState(
     preselected?.preselectedMuscle || 'Chest'
   )
-  const [workoutExercises, setWorkoutExercises] = useState([])
+  const [workoutExercises, setWorkoutExercises] = useState(() => getPreselectedExercises())
   const [completedWorkout, setCompletedWorkout] = useState(null)
 
   const filteredExercises = exercises.filter(
@@ -30,7 +54,7 @@ function Workouts() {
     if (already) return
     setWorkoutExercises(prev => [...prev, {
       ...exercise,
-      sets: [{ reps: '', weight: '', done: false, note: '' }]
+      sets: [{ reps: 10, weight: 0, done: false }]
     }])
   }
 
@@ -128,6 +152,9 @@ function Workouts() {
         {preselected?.preselectedMuscle && (
           <div className="preselected-banner">
             ⚡ Auto-selected from your plan: <strong>{preselected.preselectedMuscle}</strong>
+            {preselected.preselectedSecondary?.length > 0 && (
+              <span> + {preselected.preselectedSecondary.join(', ')}</span>
+            )}
           </div>
         )}
 
@@ -135,7 +162,10 @@ function Workouts() {
           {filteredExercises.map(exercise => {
             const added = workoutExercises.find(e => e.name === exercise.name)
             return (
-              <div key={exercise.name} className={`exercise-card ${added ? 'added' : ''}`}>
+              <div
+                key={exercise.name}
+                className={`exercise-card ${added ? 'added' : ''}`}
+              >
                 <div className="exercise-info">
                   <h4>{exercise.name}</h4>
                   <div className="exercise-tags">
