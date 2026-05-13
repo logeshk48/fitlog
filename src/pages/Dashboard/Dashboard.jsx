@@ -8,6 +8,71 @@ import './Dashboard.css'
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const FULL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
+const QUOTES = [
+  "The only bad workout is the one that didn't happen.",
+  "Push yourself because no one else is going to do it for you.",
+  "Sweat is just fat crying.",
+  "Your body can stand almost anything. It's your mind you have to convince.",
+  "The pain you feel today will be the strength you feel tomorrow.",
+  "Don't stop when you're tired. Stop when you're done.",
+  "Wake up. Work out. Look hot. Kick ass.",
+  "Train insane or remain the same.",
+  "Believe in yourself and all that you are.",
+  "No pain, no gain. Shut up and train.",
+  "Be stronger than your excuses.",
+  "Results happen over time, not overnight.",
+]
+
+const getDailyQuote = () => {
+  const day = new Date().getDay()
+  return QUOTES[day % QUOTES.length]
+}
+
+// Counter animation hook
+function useCounter(target, duration = 1500) {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (target === 0) return
+    let start = 0
+    const increment = target / (duration / 16)
+    const timer = setInterval(() => {
+      start += increment
+      if (start >= target) {
+        setCount(target)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(start))
+      }
+    }, 16)
+    return () => clearInterval(timer)
+  }, [target])
+  return count
+}
+
+// Stats grid with counter animations
+function StatsGrid({ stats }) {
+  const totalCount = useCounter(stats.total)
+  const liftCount = useCounter(stats.bestLift)
+  const volumeCount = useCounter(stats.weekVolume)
+
+  return (
+    <div className="stats-grid animate-5">
+      <div className="stat-box">
+        <span className="stat-box-value">{totalCount}</span>
+        <span className="stat-box-label">Workouts</span>
+      </div>
+      <div className="stat-box">
+        <span className="stat-box-value">{liftCount}kg</span>
+        <span className="stat-box-label">Best Lift</span>
+      </div>
+      <div className="stat-box">
+        <span className="stat-box-value">{volumeCount}kg</span>
+        <span className="stat-box-label">Week Volume</span>
+      </div>
+    </div>
+  )
+}
+
 function Dashboard() {
   const { user } = useContext(AuthContext)
   const navigate = useNavigate()
@@ -163,21 +228,43 @@ function Dashboard() {
 
       {/* ===== GREETING ===== */}
       <div className="greeting-section animate-1">
-        <p className="greeting-time">{getGreeting()}</p>
-        <h1 className="greeting-name">{getFirstName()} 👋</h1>
-        <p className="greeting-date">
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric'
-          })}
-        </p>
+        <div className="greeting-top">
+          <div>
+            <p className="greeting-time">{getGreeting()}</p>
+            <h1 className="greeting-name">{getFirstName()} 👋</h1>
+            <p className="greeting-date">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
+          </div>
+          <div className="avatar-wrap">
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="avatar" className="user-avatar" />
+            ) : (
+              <div className="user-avatar-placeholder">
+                {getFirstName()[0]?.toUpperCase()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Daily Quote */}
+        <div className="daily-quote">
+          <p>"{getDailyQuote()}"</p>
+        </div>
       </div>
 
       {/* ===== STREAK CARD ===== */}
       <div className="streak-card animate-2">
         <div className="streak-left">
-          <div className="streak-fire">{streak > 0 ? '🔥' : '💤'}</div>
+          <div className="streak-fire">
+            {streak === 0 ? '💤' :
+             streak < 3 ? '🔥' :
+             streak < 7 ? '🔥🔥' : '🔥🔥🔥'}
+          </div>
           <div>
             <h2 className="streak-number">{streak} Day{streak !== 1 ? 's' : ''}</h2>
             <p className="streak-label">
@@ -277,20 +364,7 @@ function Dashboard() {
       </div>
 
       {/* ===== QUICK STATS ===== */}
-      <div className="stats-grid animate-5">
-        <div className="stat-box">
-          <span className="stat-box-value">{stats.total}</span>
-          <span className="stat-box-label">Workouts</span>
-        </div>
-        <div className="stat-box">
-          <span className="stat-box-value">{stats.bestLift}kg</span>
-          <span className="stat-box-label">Best Lift</span>
-        </div>
-        <div className="stat-box">
-          <span className="stat-box-value">{stats.weekVolume}kg</span>
-          <span className="stat-box-label">Week Volume</span>
-        </div>
-      </div>
+      <StatsGrid stats={stats} />
 
       {/* ===== SMART INSIGHT ===== */}
       <div className="insight-card animate-6">
