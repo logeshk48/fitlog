@@ -1,13 +1,21 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { exercises, muscleGroups, equipmentTypes } from '../../data/exercises'
 import ActiveWorkout from './ActiveWorkout'
 import WorkoutSummary from './WorkoutSummary'
 import './Workouts.css'
 
 function Workouts() {
-  const [screen, setScreen] = useState('select') // select | active | summary
-  const [selectedEquipment, setSelectedEquipment] = useState('With Weight')
-  const [selectedMuscle, setSelectedMuscle] = useState('Chest')
+  const location = useLocation()
+  const preselected = location.state
+
+  const [screen, setScreen] = useState('select')
+  const [selectedEquipment, setSelectedEquipment] = useState(
+    preselected?.preselectedEquipment || 'With Weight'
+  )
+  const [selectedMuscle, setSelectedMuscle] = useState(
+    preselected?.preselectedMuscle || 'Chest'
+  )
   const [workoutExercises, setWorkoutExercises] = useState([])
   const [completedWorkout, setCompletedWorkout] = useState(null)
 
@@ -88,7 +96,7 @@ function Workouts() {
             className={`equipment-btn ${selectedEquipment === type ? 'active' : ''}`}
             onClick={() => setSelectedEquipment(type)}
           >
-            {type === 'With Weight' ? ' With Weight' : ' Without Weight'}
+            {type === 'With Weight' ? 'With Weight' : 'Without Weight'}
           </button>
         ))}
       </div>
@@ -115,6 +123,14 @@ function Workouts() {
           Exercises
           <span className="exercise-count">{filteredExercises.length}</span>
         </h3>
+
+        {/* Preselected banner */}
+        {preselected?.preselectedMuscle && (
+          <div className="preselected-banner">
+            ⚡ Auto-selected from your plan: <strong>{preselected.preselectedMuscle}</strong>
+          </div>
+        )}
+
         <div className="exercise-list">
           {filteredExercises.map(exercise => {
             const added = workoutExercises.find(e => e.name === exercise.name)

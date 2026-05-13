@@ -325,3 +325,22 @@
 .start-btn:active {
   transform: scale(0.96);
 }
+/* ================================
+   PRESELECTED BANNER
+================================ */
+.preselected-banner {
+  background: rgba(78, 205, 196, 0.08);
+  border: 1px solid rgba(78, 205, 196, 0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+  margin-bottom: 12px;
+}
+
+.preselected-banner strong {
+  color: var(--text-primary);
+  font-weight: 800;
+}
