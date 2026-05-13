@@ -87,9 +87,7 @@
 /* ================================
    GREETING
 ================================ */
-.greeting-section {
-  margin-bottom: 24px;
-}
+.greeting-section { margin-bottom: 24px; }
 
 .greeting-top {
   display: flex;
@@ -100,29 +98,33 @@
 
 .greeting-time {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.18em;
   margin-bottom: 4px;
 }
 
 .greeting-name {
-  font-family: 'Nunito', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  font-weight: 400;
+  background: linear-gradient(135deg, #ffffff, #a0a0b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.04em;
   margin-bottom: 4px;
-  line-height: 1.1;
+  line-height: 1;
 }
 
 .greeting-date {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 400;
   color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 /* ================================
@@ -153,9 +155,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 900;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
   color: white;
   box-shadow: 0 0 16px rgba(255,107,107,0.3);
   transition: all 0.3s ease;
@@ -179,11 +180,12 @@
 
 .daily-quote p {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  color: var(--text-secondary);
-  line-height: 1.5;
+  color: rgba(168,85,247,0.9);
+  line-height: 1.6;
   font-style: italic;
+  letter-spacing: 0.01em;
 }
 
 /* ================================
@@ -232,19 +234,21 @@
 }
 
 .streak-number {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--text-primary);
-  line-height: 1.1;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--color-primary);
+  line-height: 1;
+  letter-spacing: 0.04em;
   margin-bottom: 2px;
 }
 
 .streak-label {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 500;
   color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 .streak-bar-wrap {
@@ -314,21 +318,23 @@
 }
 
 .today-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 400;
   color: var(--text-primary);
+  letter-spacing: 0.06em;
 }
 
 .plan-name-tag {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  color: var(--text-muted);
-  background: var(--bg-elevated);
+  color: var(--color-secondary);
+  background: rgba(78,205,196,0.08);
   padding: 3px 10px;
   border-radius: 99px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(78,205,196,0.2);
+  letter-spacing: 0.04em;
 }
 
 .no-plan {
@@ -367,10 +373,10 @@
 .rest-emoji { font-size: 2rem; }
 
 .rest-day h3 {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
   color: var(--color-green);
+  letter-spacing: 0.04em;
   margin-bottom: 2px;
 }
 
@@ -426,24 +432,28 @@
 
 .focus-muscle-label {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 800;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
 }
 
-.focus-muscle-name {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
-  color: var(--text-primary);
+.focus-primary-card .focus-muscle-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--color-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
-.focus-primary-card .focus-muscle-name { color: var(--color-primary); }
 .focus-secondary-card .focus-muscle-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 400;
   color: var(--color-secondary);
-  font-size: 0.82rem;
+  letter-spacing: 0.04em;
   line-height: 1.2;
 }
 
@@ -460,14 +470,14 @@
   color: white;
   border: none;
   border-radius: 14px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 6px 20px rgba(255,107,107,0.4);
   animation: pulse 2.5s ease infinite;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.1em;
 }
 
 .start-workout-btn:hover {
@@ -497,10 +507,11 @@
 }
 
 .section-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
-  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 0.12em;
   margin-bottom: 14px;
 }
 
@@ -547,11 +558,11 @@
 
 .week-day-label {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.56rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 .week-day.today .week-day-label {
@@ -591,11 +602,11 @@
 }
 
 .stat-box-value {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 400;
   line-height: 1;
+  letter-spacing: 0.04em;
 }
 
 .stat-box:nth-child(1) .stat-box-value { color: var(--color-primary); }
@@ -604,11 +615,11 @@
 
 .stat-box-label {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-align: center;
 }
 
@@ -616,8 +627,6 @@
    INSIGHT CARD
 ================================ */
 .insight-card {
-  background: var(--bg-card);
-  border: 1.5px solid var(--border);
   border-radius: 22px;
   padding: 16px 20px;
   display: flex;
@@ -627,7 +636,7 @@
     rgba(168,85,247,0.06),
     rgba(78,205,196,0.06)
   );
-  border-color: rgba(168,85,247,0.2);
+  border: 1.5px solid rgba(168,85,247,0.2);
   transition: all 0.3s ease;
 }
 
@@ -640,8 +649,9 @@
 
 .insight-text {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 500;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 }

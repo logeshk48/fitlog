@@ -28,7 +28,6 @@ const getDailyQuote = () => {
   return QUOTES[day % QUOTES.length]
 }
 
-// Counter animation hook
 function useCounter(target, duration = 1500) {
   const [count, setCount] = useState(0)
   useEffect(() => {
@@ -49,7 +48,6 @@ function useCounter(target, duration = 1500) {
   return count
 }
 
-// Stats grid with counter animations
 function StatsGrid({ stats }) {
   const totalCount = useCounter(stats.total)
   const liftCount = useCounter(stats.bestLift)
@@ -250,8 +248,6 @@ function Dashboard() {
             )}
           </div>
         </div>
-
-        {/* Daily Quote */}
         <div className="daily-quote">
           <p>"{getDailyQuote()}"</p>
         </div>
@@ -266,7 +262,7 @@ function Dashboard() {
              streak < 7 ? '🔥🔥' : '🔥🔥🔥'}
           </div>
           <div>
-            <h2 className="streak-number">{streak} Day{streak !== 1 ? 's' : ''}</h2>
+            <h2 className="streak-number">{streak} Days</h2>
             <p className="streak-label">
               {streak === 0 ? 'Start your streak!' :
                streak < 3 ? 'Getting started!' :
@@ -298,10 +294,7 @@ function Dashboard() {
         {!activePlan ? (
           <div className="no-plan">
             <p>No active plan set</p>
-            <button
-              className="create-plan-btn"
-              onClick={() => navigate('/plans')}
-            >
+            <button className="create-plan-btn" onClick={() => navigate('/plans')}>
               Create Plan →
             </button>
           </div>
