@@ -11,16 +11,9 @@ function Stats() {
   const [workouts, setWorkouts] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
-
-  // Computed stats
   const [overview, setOverview] = useState({
-    total: 0,
-    totalVolume: 0,
-    bestLift: 0,
-    avgPerWeek: 0,
-    currentStreak: 0,
-    longestStreak: 0,
-    thisMonth: 0,
+    total: 0, totalVolume: 0, bestLift: 0,
+    avgPerWeek: 0, currentStreak: 0, longestStreak: 0, thisMonth: 0,
   })
   const [muscleData, setMuscleData] = useState([])
   const [weeklyData, setWeeklyData] = useState([])
@@ -42,31 +35,26 @@ function Stats() {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       setWorkouts(data)
       computeStats(data)
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
     setLoading(false)
   }
 
   const computeStats = (data) => {
     if (data.length === 0) return
 
-    // Overview
     let totalVolume = 0
     let bestLift = 0
     const muscleCounts = {}
     const exercisePRs = {}
     const dayVolumes = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 }
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-    // This month
     const now = new Date()
+
     const thisMonth = data.filter(w => {
       const d = w.createdAt?.toDate?.() || new Date(w.date)
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
     }).length
 
-    // This week volume
     const monday = new Date(now)
     const diff = now.getDay() === 0 ? -6 : 1 - now.getDay()
     monday.setDate(now.getDate() + diff)
@@ -78,30 +66,19 @@ function Stats() {
       const isThisWeek = wDate >= monday
 
       workout.exercises?.forEach(ex => {
-        // Muscle counts
         if (ex.muscleGroup) {
           muscleCounts[ex.muscleGroup] = (muscleCounts[ex.muscleGroup] || 0) + 1
         }
-
         ex.sets?.forEach(set => {
           const vol = (set.weight || 0) * (set.reps || 0)
           totalVolume += vol
-
           if (set.weight > bestLift) bestLift = set.weight
-
-          // Weekly volume
-          if (isThisWeek) {
-            dayVolumes[dayName] = (dayVolumes[dayName] || 0) + vol
-          }
-
-          // Personal records
+          if (isThisWeek) dayVolumes[dayName] = (dayVolumes[dayName] || 0) + vol
           if (ex.name && set.weight > 0) {
             if (!exercisePRs[ex.name] || set.weight > exercisePRs[ex.name].weight) {
               exercisePRs[ex.name] = {
-                weight: set.weight,
-                reps: set.reps,
-                date: wDate,
-                muscle: ex.muscleGroup
+                weight: set.weight, reps: set.reps,
+                date: wDate, muscle: ex.muscleGroup
               }
             }
           }
@@ -109,97 +86,97 @@ function Stats() {
       })
     })
 
-    // Streak calculation
-    let currentStreak = 0
-    let longestStreak = 0
-    let tempStreak = 0
+    // Streak
+    let currentStreak = 0, longestStreak = 0, tempStreak = 0
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-
     for (let i = 0; i < 365; i++) {
       const date = new Date(today)
       date.setDate(today.getDate() - i)
-      const dateStr = date.toDateString()
       const hasWorkout = data.some(w => {
         const wDate = w.createdAt?.toDate?.() || new Date(w.date)
-        return wDate.toDateString() === dateStr
+        return wDate.toDateString() === date.toDateString()
       })
       if (hasWorkout) {
         tempStreak++
         if (i === 0 || currentStreak > 0) currentStreak = tempStreak
         if (tempStreak > longestStreak) longestStreak = tempStreak
-      } else {
-        if (i > 0) tempStreak = 0
-      }
+      } else if (i > 0) tempStreak = 0
     }
 
-    // Avg per week
     const firstWorkout = data[data.length - 1]
     const firstDate = firstWorkout?.createdAt?.toDate?.() || new Date(firstWorkout?.date)
     const weeksActive = Math.max(1, Math.ceil((now - firstDate) / (7 * 24 * 60 * 60 * 1000)))
-    const avgPerWeek = (data.length / weeksActive).toFixed(1)
 
     setOverview({
       total: data.length,
       totalVolume: Math.round(totalVolume),
       bestLift,
-      avgPerWeek,
+      avgPerWeek: (data.length / weeksActive).toFixed(1),
       currentStreak,
       longestStreak,
       thisMonth
     })
 
-    // Muscle data for chart
-    const muscleArray = Object.entries(muscleCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([name, count]) => ({
-        name,
-        count,
-        percent: Math.round((count / Object.values(muscleCounts).reduce((a, b) => a + b, 0)) * 100)
-      }))
-    setMuscleData(muscleArray)
+    const totalMuscleCount = Object.values(muscleCounts).reduce((a, b) => a + b, 0)
+    setMuscleData(
+      Object.entries(muscleCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name, count]) => ({
+          name, count,
+          percent: Math.round((count / totalMuscleCount) * 100)
+        }))
+    )
 
-    // Weekly data
-    const weekArray = DAYS.map(day => ({
-      day,
-      volume: Math.round(dayVolumes[day] || 0)
-    }))
-    setWeeklyData(weekArray)
+    setWeeklyData(DAYS.map(day => ({
+      day, volume: Math.round(dayVolumes[day] || 0)
+    })))
 
-    // Personal records
-    const prArray = Object.entries(exercisePRs)
-      .sort((a, b) => b[1].weight - a[1].weight)
-      .slice(0, 10)
-      .map(([name, data]) => ({ name, ...data }))
-    setPersonalRecords(prArray)
+    setPersonalRecords(
+      Object.entries(exercisePRs)
+        .sort((a, b) => b[1].weight - a[1].weight)
+        .slice(0, 10)
+        .map(([name, data]) => ({ name, ...data }))
+    )
 
-    // Smart insights
     const insightsList = []
     if (currentStreak > 0) insightsList.push(`🔥 You're on a ${currentStreak}-day streak! Keep it up!`)
-    if (muscleArray[0]) insightsList.push(`💪 You train ${muscleArray[0].name} the most (${muscleArray[0].percent}% of workouts)`)
-    if (muscleArray.length > 1) {
-      const leastTrained = muscleArray[muscleArray.length - 1]
-      insightsList.push(`⚠️ You rarely train ${leastTrained.name}. Consider adding it!`)
+    if (muscleData[0] || Object.keys(muscleCounts).length > 0) {
+      const top = Object.entries(muscleCounts).sort((a, b) => b[1] - a[1])[0]
+      if (top) insightsList.push(`💪 You train ${top[0]} the most (${Math.round((top[1]/totalMuscleCount)*100)}% of workouts)`)
     }
+    const leastEntry = Object.entries(muscleCounts).sort((a, b) => a[1] - b[1])[0]
+    if (leastEntry) insightsList.push(`⚠️ You rarely train ${leastEntry[0]}. Consider adding it!`)
     if (bestLift > 0) insightsList.push(`🏆 Your heaviest lift is ${bestLift}kg. Beast mode!`)
     if (thisMonth > 0) insightsList.push(`📅 You've worked out ${thisMonth} times this month!`)
     const strongestDay = DAYS.reduce((a, b) => dayVolumes[a] > dayVolumes[b] ? a : b)
     if (dayVolumes[strongestDay] > 0) insightsList.push(`⚡ Your strongest day this week is ${strongestDay}!`)
+    if (longestStreak > currentStreak && longestStreak > 0) insightsList.push(`🎯 Your best streak was ${longestStreak} days. Can you beat it?`)
     setInsights(insightsList)
   }
 
-  const getHeatmapData = () => {
-    const data = {}
-    workouts.forEach(w => {
-      const d = w.createdAt?.toDate?.() || new Date(w.date)
-      const key = d.toDateString()
-      data[key] = (data[key] || 0) + 1
-    })
-    return data
-  }
-
   const tabs = ['overview', 'records', 'history', 'insights']
+  const maxVolume = Math.max(...weeklyData.map(d => d.volume), 1)
+  const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
+
+  const insightColors = [
+    { bg: 'rgba(255,107,107,0.08)', border: 'rgba(255,107,107,0.2)' },
+    { bg: 'rgba(78,205,196,0.08)', border: 'rgba(78,205,196,0.2)' },
+    { bg: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.2)' },
+    { bg: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.2)' },
+    { bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.2)' },
+    { bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.2)' },
+  ]
+
+  const muscleColors = [
+    'var(--color-primary)',
+    'var(--color-secondary)',
+    'var(--color-purple)',
+    'var(--color-orange)',
+    'var(--color-green)',
+    'var(--color-blue)',
+  ]
 
   if (loading) {
     return (
@@ -224,9 +201,6 @@ function Stats() {
       </div>
     )
   }
-
-  const maxVolume = Math.max(...weeklyData.map(d => d.volume), 1)
-  const heatmap = getHeatmapData()
 
   return (
     <div className="stats-page">
@@ -286,24 +260,20 @@ function Stats() {
           <div className="chart-card">
             <h3 className="chart-title">This Week's Volume</h3>
             <div className="bar-chart">
-              {weeklyData.map((d, i) => {
-                const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
-                const isToday = i === todayIndex
-                return (
-                  <div key={d.day} className="bar-item">
-                    <span className="bar-volume">
-                      {d.volume > 0 ? `${(d.volume/1000).toFixed(1)}t` : ''}
-                    </span>
-                    <div className="bar-wrap">
-                      <div
-                        className={`bar-fill ${isToday ? 'today' : ''} ${d.volume > 0 ? 'active' : ''}`}
-                        style={{ height: `${(d.volume / maxVolume) * 100}%` }}
-                      />
-                    </div>
-                    <span className={`bar-label ${isToday ? 'today' : ''}`}>{d.day}</span>
+              {weeklyData.map((d, i) => (
+                <div key={d.day} className="bar-item">
+                  <span className="bar-volume">
+                    {d.volume > 0 ? `${(d.volume / 1000).toFixed(1)}t` : ''}
+                  </span>
+                  <div className="bar-wrap">
+                    <div
+                      className={`bar-fill ${i === todayIndex ? 'today' : ''} ${d.volume > 0 ? 'active' : ''}`}
+                      style={{ height: `${Math.max((d.volume / maxVolume) * 100, d.volume > 0 ? 8 : 0)}%` }}
+                    />
                   </div>
-                )
-              })}
+                  <span className={`bar-label ${i === todayIndex ? 'today' : ''}`}>{d.day}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -311,38 +281,28 @@ function Stats() {
           <div className="chart-card">
             <h3 className="chart-title">Muscle Distribution</h3>
             <div className="muscle-bars">
-              {muscleData.map((m, i) => {
-                const colors = [
-                  'var(--color-primary)',
-                  'var(--color-secondary)',
-                  'var(--color-purple)',
-                  'var(--color-orange)',
-                  'var(--color-green)',
-                  'var(--color-blue)'
-                ]
-                return (
-                  <div key={m.name} className="muscle-bar-row">
-                    <span className="muscle-bar-name">{m.name}</span>
-                    <div className="muscle-bar-track">
-                      <div
-                        className="muscle-bar-fill"
-                        style={{
-                          width: `${m.percent}%`,
-                          background: colors[i % colors.length]
-                        }}
-                      />
-                    </div>
-                    <span className="muscle-bar-percent">{m.percent}%</span>
+              {muscleData.map((m, i) => (
+                <div key={m.name} className="muscle-bar-row">
+                  <span className="muscle-bar-name">{m.name}</span>
+                  <div className="muscle-bar-track">
+                    <div
+                      className="muscle-bar-fill"
+                      style={{
+                        width: `${m.percent}%`,
+                        background: muscleColors[i % muscleColors.length]
+                      }}
+                    />
                   </div>
-                )
-              })}
+                  <span className="muscle-bar-percent">{m.percent}%</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Streak Info */}
+          {/* Streak Stats */}
           <div className="streak-stats-card">
             <div className="streak-stat">
-              <span className="streak-stat-value">{overview.currentStreak}</span>
+              <span className="streak-stat-value">{overview.currentStreak}🔥</span>
               <span className="streak-stat-label">Current Streak</span>
             </div>
             <div className="streak-divider" />
@@ -395,15 +355,14 @@ function Stats() {
         <div className="tab-content">
           <h3 className="section-label">📅 Workout History</h3>
           <div className="history-list">
-            {workouts.map((workout, i) => {
+            {workouts.map((workout) => {
               const date = workout.createdAt?.toDate?.() || new Date(workout.date)
               const vol = workout.exercises?.reduce((acc, ex) =>
-                acc + ex.sets?.reduce((a, s) =>
+                acc + (ex.sets?.reduce((a, s) =>
                   a + (s.weight || 0) * (s.reps || 0), 0
-                ), 0
+                ) || 0), 0
               ) || 0
-              const muscles = [...new Set(workout.exercises?.map(ex => ex.muscleGroup))]
-
+              const muscles = [...new Set(workout.exercises?.map(ex => ex.muscleGroup).filter(Boolean))]
               return (
                 <div key={workout.id} className="history-card">
                   <div className="history-date">
@@ -427,7 +386,9 @@ function Stats() {
                     </div>
                   </div>
                   <div className="history-duration">
-                    {workout.duration ? `${Math.floor(workout.duration / 60)}m` : '—'}
+                    {workout.duration && workout.duration > 0
+                      ? `${Math.floor(workout.duration / 60)}m`
+                      : '—'}
                   </div>
                 </div>
               )
@@ -442,7 +403,14 @@ function Stats() {
           <h3 className="section-label">⚡ Smart Insights</h3>
           <div className="insights-list">
             {insights.map((insight, i) => (
-              <div key={i} className="insight-item">
+              <div
+                key={i}
+                className="insight-item"
+                style={{
+                  background: insightColors[i % insightColors.length].bg,
+                  borderColor: insightColors[i % insightColors.length].border
+                }}
+              >
                 <p>{insight}</p>
               </div>
             ))}
