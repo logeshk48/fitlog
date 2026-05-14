@@ -1,0 +1,625 @@
+/* ================================
+   STATS PAGE
+================================ */
+.stats-page {
+  padding: 24px 16px;
+  padding-bottom: 120px;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ================================
+   HEADER
+================================ */
+.stats-page-header {
+  margin-bottom: 20px;
+}
+
+.stats-page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stats-subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ================================
+   TABS
+================================ */
+.stats-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: var(--bg-surface);
+  padding: 5px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.stats-tab {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.02em;
+}
+
+.stats-tab.active {
+  background: var(--grad-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255,107,107,0.35);
+  transform: scale(1.02);
+}
+
+/* ================================
+   TAB CONTENT
+================================ */
+.tab-content {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ================================
+   OVERVIEW GRID
+================================ */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.overview-card {
+  border-radius: 18px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.overview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.overview-card.coral::before { background: var(--grad-primary); }
+.overview-card.teal::before { background: var(--grad-secondary); }
+.overview-card.purple::before { background: var(--grad-purple); }
+.overview-card.green::before { background: var(--grad-green); }
+.overview-card.orange::before { background: var(--grad-energy); }
+.overview-card.blue::before { background: linear-gradient(135deg, #3B82F6, #4ECDC4); }
+
+.overview-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.overview-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.overview-card.coral .overview-value { color: var(--color-primary); }
+.overview-card.teal .overview-value { color: var(--color-secondary); }
+.overview-card.purple .overview-value { color: var(--color-purple); }
+.overview-card.green .overview-value { color: var(--color-green); }
+.overview-card.orange .overview-value { color: var(--color-orange); }
+.overview-card.blue .overview-value { color: var(--color-blue); }
+
+.overview-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* ================================
+   CHART CARD
+================================ */
+.chart-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  border-color: rgba(255,107,107,0.2);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+}
+
+.chart-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+/* ================================
+   BAR CHART
+================================ */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 120px;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.bar-volume {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-height: 14px;
+  text-align: center;
+}
+
+.bar-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg-elevated);
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 60px;
+}
+
+.bar-fill {
+  width: 100%;
+  min-height: 3px;
+  border-radius: 6px;
+  background: var(--border);
+  transition: height 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bar-fill.active {
+  background: var(--grad-secondary);
+  box-shadow: 0 -2px 8px rgba(78,205,196,0.3);
+}
+
+.bar-fill.today.active {
+  background: var(--grad-primary);
+  box-shadow: 0 -2px 8px rgba(255,107,107,0.4);
+}
+
+.bar-fill.today:not(.active) {
+  background: rgba(255,107,107,0.2);
+}
+
+.bar-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bar-label.today {
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
+/* ================================
+   MUSCLE BARS
+================================ */
+.muscle-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.muscle-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.muscle-bar-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 72px;
+}
+
+.muscle-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.muscle-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px currentColor;
+  opacity: 0.9;
+}
+
+.muscle-bar-percent {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ================================
+   STREAK STATS
+================================ */
+.streak-stats-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 16px;
+}
+
+.streak-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.streak-stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--color-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.streak-stat-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.streak-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+}
+
+/* ================================
+   SECTION LABEL
+================================ */
+.section-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+/* ================================
+   PERSONAL RECORDS
+================================ */
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.record-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.record-card:hover {
+  transform: translateX(4px);
+  border-color: rgba(255,107,107,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.record-rank {
+  font-size: 1.3rem;
+  min-width: 32px;
+  text-align: center;
+}
+
+.record-info {
+  flex: 1;
+}
+
+.record-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.record-muscle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.record-weight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.record-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  color: var(--color-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.record-reps {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ================================
+   WORKOUT HISTORY
+================================ */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.history-card:hover {
+  transform: translateX(4px);
+  border-color: rgba(78,205,196,0.3);
+}
+
+.history-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 36px;
+}
+
+.history-day {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--color-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.history-full-date {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.history-info {
+  flex: 1;
+}
+
+.history-muscles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.history-muscle-tag {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}
+
+.history-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.history-duration {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ================================
+   INSIGHTS
+================================ */
+.insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.insight-item {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 18px;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease forwards;
+  background: linear-gradient(135deg,
+    rgba(168,85,247,0.05),
+    rgba(78,205,196,0.05)
+  );
+  border-color: rgba(168,85,247,0.15);
+}
+
+.insight-item:hover {
+  transform: translateX(4px);
+  border-color: rgba(168,85,247,0.3);
+  box-shadow: 0 4px 16px rgba(168,85,247,0.1);
+}
+
+.insight-item p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ================================
+   NO RECORDS
+================================ */
+.no-records {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+}
+
+/* ================================
+   LOADING & EMPTY
+================================ */
+.stats-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  gap: 16px;
+}
+
+.stats-loading-icon {
+  font-size: 3rem;
+  animation: pulse 1.5s ease infinite;
+}
+
+.stats-loading p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.stats-empty {
+  padding: 24px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  animation: pulse 2s ease infinite;
+}
+
+.empty-state h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+}
+
+.empty-state p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
