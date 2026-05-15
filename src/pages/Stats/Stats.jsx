@@ -146,8 +146,11 @@ function Stats() {
       const top = Object.entries(muscleCounts).sort((a, b) => b[1] - a[1])[0]
       if (top) insightsList.push(`💪 You train ${top[0]} the most (${Math.round((top[1]/totalMuscleCount)*100)}% of workouts)`)
     }
-    const leastEntry = Object.entries(muscleCounts).sort((a, b) => a[1] - b[1])[0]
-    if (leastEntry) insightsList.push(`⚠️ You rarely train ${leastEntry[0]}. Consider adding it!`)
+    const sortedMuscles = Object.entries(muscleCounts).sort((a, b) => a[1] - b[1])
+    if (sortedMuscles.length > 1) {
+      const leastEntry = sortedMuscles[0]
+      insightsList.push(`⚠️ You rarely train ${leastEntry[0]}. Consider adding it!`)
+    }
     if (bestLift > 0) insightsList.push(`🏆 Your heaviest lift is ${bestLift}kg. Beast mode!`)
     if (thisMonth > 0) insightsList.push(`📅 You've worked out ${thisMonth} times this month!`)
     const strongestDay = DAYS.reduce((a, b) => dayVolumes[a] > dayVolumes[b] ? a : b)
