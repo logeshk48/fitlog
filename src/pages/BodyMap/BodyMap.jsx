@@ -1,131 +1,140 @@
 import { useRef, useEffect, useState, useContext } from 'react'
-import { BodyChart, ViewSide, MUSCLE_GROUPS } from 'body-muscles'
+import { BodyChart, ViewSide } from 'body-muscles'
 import { AuthContext } from '../../context/AuthContext'
 import { getWorkouts } from '../../hooks/useFirestore'
+import { exercises as exerciseLibrary } from '../../data/exercises'
 import './BodyMap.css'
 
-// Map exercise names / workout types → body-muscles IDs
-const EXERCISE_MUSCLE_MAP = {
-  // Chest
-  'bench press': ['chest-upper-left', 'chest-upper-right', 'chest-lower-left', 'chest-lower-right'],
-  'chest press': ['chest-upper-left', 'chest-upper-right'],
-  'push up': ['chest-upper-left', 'chest-upper-right', 'triceps-left', 'triceps-right'],
-  'chest fly': ['chest-upper-left', 'chest-upper-right', 'chest-lower-left', 'chest-lower-right'],
-  'incline press': ['chest-upper-left', 'chest-upper-right'],
-  'decline press': ['chest-lower-left', 'chest-lower-right'],
-
-  // Back
-  'pull up': ['latissimus-dorsi-left', 'latissimus-dorsi-right', 'biceps-left', 'biceps-right'],
-  'lat pulldown': ['latissimus-dorsi-left', 'latissimus-dorsi-right'],
-  'row': ['latissimus-dorsi-left', 'latissimus-dorsi-right', 'trapezius-middle-left', 'trapezius-middle-right'],
-  'deadlift': ['latissimus-dorsi-left', 'latissimus-dorsi-right', 'gluteus-maximus-left', 'gluteus-maximus-right', 'hamstrings-left', 'hamstrings-right'],
-  'pull down': ['latissimus-dorsi-left', 'latissimus-dorsi-right'],
-
-  // Shoulders
-  'shoulder press': ['deltoid-anterior-left', 'deltoid-anterior-right', 'deltoid-lateral-left', 'deltoid-lateral-right'],
-  'lateral raise': ['deltoid-lateral-left', 'deltoid-lateral-right'],
-  'front raise': ['deltoid-anterior-left', 'deltoid-anterior-right'],
-  'overhead press': ['deltoid-anterior-left', 'deltoid-anterior-right', 'triceps-left', 'triceps-right'],
-  'arnold press': ['deltoid-anterior-left', 'deltoid-anterior-right', 'deltoid-lateral-left', 'deltoid-lateral-right'],
-
-  // Biceps
-  'curl': ['biceps-left', 'biceps-right'],
-  'bicep curl': ['biceps-left', 'biceps-right'],
-  'hammer curl': ['biceps-left', 'biceps-right', 'brachioradialis-left', 'brachioradialis-right'],
-  'chin up': ['biceps-left', 'biceps-right', 'latissimus-dorsi-left', 'latissimus-dorsi-right'],
-
-  // Triceps
-  'tricep': ['triceps-left', 'triceps-right'],
-  'triceps': ['triceps-left', 'triceps-right'],
-  'dip': ['triceps-left', 'triceps-right', 'chest-lower-left', 'chest-lower-right'],
-  'skull crusher': ['triceps-left', 'triceps-right'],
-  'pushdown': ['triceps-left', 'triceps-right'],
-
-  // Legs
-  'squat': ['quadriceps-left', 'quadriceps-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
-  'leg press': ['quadriceps-left', 'quadriceps-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
-  'lunge': ['quadriceps-left', 'quadriceps-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
-  'leg extension': ['quadriceps-left', 'quadriceps-right'],
-  'leg curl': ['hamstrings-left', 'hamstrings-right'],
-  'hamstring': ['hamstrings-left', 'hamstrings-right'],
-  'calf raise': ['gastrocnemius-left', 'gastrocnemius-right'],
-  'calf': ['gastrocnemius-left', 'gastrocnemius-right'],
-
-  // Glutes
-  'hip thrust': ['gluteus-maximus-left', 'gluteus-maximus-right'],
-  'glute bridge': ['gluteus-maximus-left', 'gluteus-maximus-right'],
-  'rdl': ['hamstrings-left', 'hamstrings-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
-
-  // Abs
-  'crunch': ['rectus-abdominis-upper', 'rectus-abdominis-lower'],
-  'plank': ['rectus-abdominis-upper', 'rectus-abdominis-lower', 'obliques-left', 'obliques-right'],
-  'ab': ['rectus-abdominis-upper', 'rectus-abdominis-lower'],
-  'sit up': ['rectus-abdominis-upper', 'rectus-abdominis-lower'],
-  'russian twist': ['obliques-left', 'obliques-right'],
-  'leg raise': ['rectus-abdominis-lower', 'hip-flexors-left', 'hip-flexors-right'],
-
-  // Traps
-  'shrug': ['trapezius-upper-left', 'trapezius-upper-right'],
-  'trap': ['trapezius-upper-left', 'trapezius-upper-right'],
-  'face pull': ['trapezius-middle-left', 'trapezius-middle-right', 'deltoid-posterior-left', 'deltoid-posterior-right'],
+// ================================
+// MUSCLE GROUP → BODY-MUSCLES IDS
+// ================================
+const MUSCLE_ID_MAP = {
+  'Chest': [
+    'chest-upper-left', 'chest-upper-right',
+    'chest-lower-left', 'chest-lower-right'
+  ],
+  'Back': [
+    'latissimus-dorsi-left', 'latissimus-dorsi-right',
+    'trapezius-upper-left', 'trapezius-upper-right',
+    'trapezius-middle-left', 'trapezius-middle-right'
+  ],
+  'Shoulders': [
+    'deltoid-anterior-left', 'deltoid-anterior-right',
+    'deltoid-lateral-left', 'deltoid-lateral-right',
+    'deltoid-posterior-left', 'deltoid-posterior-right'
+  ],
+  'Biceps': ['biceps-left', 'biceps-right'],
+  'Triceps': ['triceps-left', 'triceps-right'],
+  'Forearms': ['brachioradialis-left', 'brachioradialis-right'],
+  'Core': [
+    'rectus-abdominis-upper', 'rectus-abdominis-lower',
+    'obliques-left', 'obliques-right'
+  ],
+  'Legs': [
+    'quadriceps-left', 'quadriceps-right',
+    'hamstrings-left', 'hamstrings-right'
+  ],
+  'Glutes': ['gluteus-maximus-left', 'gluteus-maximus-right'],
+  'Calves': ['gastrocnemius-left', 'gastrocnemius-right'],
+  'Full Body': [
+    'chest-upper-left', 'chest-upper-right',
+    'latissimus-dorsi-left', 'latissimus-dorsi-right',
+    'deltoid-anterior-left', 'deltoid-anterior-right',
+    'biceps-left', 'biceps-right',
+    'triceps-left', 'triceps-right',
+    'rectus-abdominis-upper', 'rectus-abdominis-lower',
+    'quadriceps-left', 'quadriceps-right',
+    'hamstrings-left', 'hamstrings-right',
+    'gluteus-maximus-left', 'gluteus-maximus-right',
+    'gastrocnemius-left', 'gastrocnemius-right',
+  ],
+  'Hamstrings': ['hamstrings-left', 'hamstrings-right'],
+  'Lower Back': ['latissimus-dorsi-left', 'latissimus-dorsi-right'],
+  'Hip Flexors': ['hip-flexors-left', 'hip-flexors-right'],
+  'Obliques': ['obliques-left', 'obliques-right'],
+  'Lower Abs': ['rectus-abdominis-lower'],
+  'Upper Back': ['trapezius-middle-left', 'trapezius-middle-right'],
 }
 
-// Workout type → default muscles if no exercise match
-const TYPE_MUSCLE_MAP = {
-  strength: ['chest-upper-left', 'chest-upper-right', 'biceps-left', 'biceps-right', 'triceps-left', 'triceps-right'],
-  cardio: ['quadriceps-left', 'quadriceps-right', 'hamstrings-left', 'hamstrings-right', 'gastrocnemius-left', 'gastrocnemius-right'],
-  flexibility: ['hamstrings-left', 'hamstrings-right', 'obliques-left', 'obliques-right'],
-  sports: ['quadriceps-left', 'quadriceps-right', 'deltoid-lateral-left', 'deltoid-lateral-right'],
+// ================================
+// INTENSITY → COLOR (shades)
+// ================================
+function intensityToColor(intensity) {
+  if (intensity === 0) return '#2a2a35'
+  if (intensity <= 2) return '#FFE66D40'
+  if (intensity === 3) return '#FFE66D90'
+  if (intensity === 4) return '#FFE66D'
+  if (intensity === 5) return '#4ECDC460'
+  if (intensity === 6) return '#4ECDC490'
+  if (intensity === 7) return '#4ECDC4'
+  if (intensity === 8) return '#FF6B6B60'
+  if (intensity === 9) return '#FF6B6B90'
+  return '#FF6B6B'
 }
 
-function getMuscleCounts(workouts, timeFilter) {
+// ================================
+// COMPUTE MUSCLE HITS FROM WORKOUTS
+// ================================
+function computeMuscleCounts(workouts, timeFilter) {
   const now = new Date()
   const filtered = workouts.filter((w) => {
-    if (!w.createdAt) return false
-    const d = w.createdAt.toDate ? w.createdAt.toDate() : new Date(w.createdAt)
+    const d = w.createdAt?.toDate?.() || new Date(w.date)
     if (timeFilter === 'week') return now - d <= 7 * 24 * 60 * 60 * 1000
     if (timeFilter === 'month') return now - d <= 30 * 24 * 60 * 60 * 1000
     return true
   })
 
-  const counts = {}
+  const primaryCounts = {}
+  const secondaryCounts = {}
 
-  filtered.forEach((w) => {
-    const musclesHit = new Set()
+  filtered.forEach((workout) => {
+    workout.exercises?.forEach((ex) => {
+      const libEx = exerciseLibrary.find(
+        (e) => e.name.toLowerCase() === ex.name?.toLowerCase()
+      )
 
-    // Try to match exercises
-    if (w.exercises?.length) {
-      w.exercises.forEach((ex) => {
-        const name = ex.name?.toLowerCase() || ''
-        Object.entries(EXERCISE_MUSCLE_MAP).forEach(([key, muscles]) => {
-          if (name.includes(key)) muscles.forEach((m) => musclesHit.add(m))
+      if (libEx) {
+        const primaryIds = MUSCLE_ID_MAP[libEx.muscleGroup] || []
+        primaryIds.forEach((id) => {
+          primaryCounts[id] = (primaryCounts[id] || 0) + 1
         })
-      })
-    }
-
-    // Fallback to workout type
-    if (musclesHit.size === 0 && w.type) {
-      const defaults = TYPE_MUSCLE_MAP[w.type] || []
-      defaults.forEach((m) => musclesHit.add(m))
-    }
-
-    musclesHit.forEach((m) => { counts[m] = (counts[m] || 0) + 1 })
+        libEx.secondaryMuscles?.forEach((sec) => {
+          const secIds = MUSCLE_ID_MAP[sec] || []
+          secIds.forEach((id) => {
+            secondaryCounts[id] = (secondaryCounts[id] || 0) + 0.5
+          })
+        })
+      } else if (ex.muscleGroup) {
+        const ids = MUSCLE_ID_MAP[ex.muscleGroup] || []
+        ids.forEach((id) => {
+          primaryCounts[id] = (primaryCounts[id] || 0) + 1
+        })
+      }
+    })
   })
 
-  return counts
+  const combined = { ...primaryCounts }
+  Object.entries(secondaryCounts).forEach(([id, count]) => {
+    combined[id] = (combined[id] || 0) + count
+  })
+
+  return { combined, primaryCounts }
 }
 
-function countsToBodyState(counts) {
-  const max = Math.max(...Object.values(counts), 1)
+function countsToBodyState(combined) {
+  const max = Math.max(...Object.values(combined), 1)
   const state = {}
-  Object.entries(counts).forEach(([id, count]) => {
+  Object.entries(combined).forEach(([id, count]) => {
     const intensity = Math.min(10, Math.round((count / max) * 10))
     state[id] = { intensity, selected: false }
   })
   return state
 }
 
-const MUSCLE_LABEL_MAP = {
+// ================================
+// MUSCLE LABEL MAP
+// ================================
+const MUSCLE_LABELS = {
   'chest-upper-left': 'Chest', 'chest-upper-right': 'Chest',
   'chest-lower-left': 'Lower Chest', 'chest-lower-right': 'Lower Chest',
   'biceps-left': 'Biceps', 'biceps-right': 'Biceps',
@@ -146,6 +155,9 @@ const MUSCLE_LABEL_MAP = {
   'hip-flexors-left': 'Hip Flexors', 'hip-flexors-right': 'Hip Flexors',
 }
 
+// ================================
+// MAIN COMPONENT
+// ================================
 export default function BodyMap() {
   const { user } = useContext(AuthContext)
   const frontRef = useRef(null)
@@ -158,6 +170,7 @@ export default function BodyMap() {
   const [selectedMuscle, setSelectedMuscle] = useState(null)
   const [muscleCounts, setMuscleCounts] = useState({})
   const [loading, setLoading] = useState(true)
+  const [chartsReady, setChartsReady] = useState(false)
 
   // Load workouts
   useEffect(() => {
@@ -169,177 +182,240 @@ export default function BodyMap() {
     load()
   }, [user])
 
-  // Init charts
+  // Init charts with delay to ensure DOM is ready
   useEffect(() => {
     if (!frontRef.current || !backRef.current) return
 
-    frontChartRef.current = new BodyChart(frontRef.current, {
-      view: ViewSide.FRONT,
-      bodyState: {},
-      showViewLabel: false,
-      enableTransitions: true,
-      onMuscleClick: (id, name) => {
-        setSelectedMuscle({ id, name: MUSCLE_LABEL_MAP[id] || name })
-      },
-    })
+    const timer = setTimeout(() => {
+      frontChartRef.current = new BodyChart(frontRef.current, {
+        view: ViewSide.FRONT,
+        bodyState: {},
+        showViewLabel: false,
+        enableTransitions: true,
+        onMuscleClick: (id, name) => {
+          setSelectedMuscle({
+            id,
+            name: MUSCLE_LABELS[id] || name,
+          })
+        },
+      })
 
-    backChartRef.current = new BodyChart(backRef.current, {
-      view: ViewSide.BACK,
-      bodyState: {},
-      showViewLabel: false,
-      enableTransitions: true,
-      onMuscleClick: (id, name) => {
-        setSelectedMuscle({ id, name: MUSCLE_LABEL_MAP[id] || name })
-      },
-    })
+      backChartRef.current = new BodyChart(backRef.current, {
+        view: ViewSide.BACK,
+        bodyState: {},
+        showViewLabel: false,
+        enableTransitions: true,
+        onMuscleClick: (id, name) => {
+          setSelectedMuscle({
+            id,
+            name: MUSCLE_LABELS[id] || name,
+          })
+        },
+      })
+
+      setChartsReady(true)
+    }, 100)
 
     return () => {
+      clearTimeout(timer)
       frontChartRef.current?.destroy()
       backChartRef.current?.destroy()
     }
   }, [])
 
-  // Update body state when workouts or filter changes
+  // Update colors when workouts or filter changes
   useEffect(() => {
-    if (loading) return
-    const counts = getMuscleCounts(workouts, timeFilter)
-    setMuscleCounts(counts)
-    const bodyState = countsToBodyState(counts)
+    if (loading || !chartsReady) return
+    const { combined } = computeMuscleCounts(workouts, timeFilter)
+    setMuscleCounts(combined)
+    const bodyState = countsToBodyState(combined)
     frontChartRef.current?.update({ bodyState })
     backChartRef.current?.update({ bodyState })
-  }, [workouts, timeFilter, loading])
+  }, [workouts, timeFilter, loading, chartsReady])
 
-  // Get exercises that hit selected muscle
+  // Get exercises for selected muscle bottom sheet
   function getExercisesForMuscle(muscleId) {
     const results = []
     workouts.forEach((w) => {
       w.exercises?.forEach((ex) => {
-        const name = ex.name?.toLowerCase() || ''
-        const hit = Object.entries(EXERCISE_MUSCLE_MAP).some(([key, muscles]) =>
-          name.includes(key) && muscles.includes(muscleId)
+        const libEx = exerciseLibrary.find(
+          (e) => e.name.toLowerCase() === ex.name?.toLowerCase()
         )
-        if (hit) {
-          const date = w.createdAt?.toDate ? w.createdAt.toDate() : new Date(w.createdAt)
+        if (!libEx) return
+        const primaryIds = MUSCLE_ID_MAP[libEx.muscleGroup] || []
+        const secondaryIds = libEx.secondaryMuscles?.flatMap(
+          (s) => MUSCLE_ID_MAP[s] || []
+        ) || []
+        const allIds = [...primaryIds, ...secondaryIds]
+        if (allIds.includes(muscleId)) {
+          const date = w.createdAt?.toDate?.() || new Date(w.date)
           results.push({
             name: ex.name,
+            muscleGroup: libEx.muscleGroup,
             sets: ex.sets,
-            reps: ex.reps,
-            weight: ex.weight,
             date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            isPrimary: primaryIds.includes(muscleId),
           })
         }
       })
     })
-    return results.slice(0, 5)
+    return results.slice(0, 6)
   }
 
-  const trainedCount = Object.keys(muscleCounts).length
+  // Cap at totalMuscles to avoid > 100%
   const totalMuscles = 20
+  const trainedCount = Math.min(Object.keys(muscleCounts).length, totalMuscles)
+  const coveragePct = Math.min(Math.round((trainedCount / totalMuscles) * 100), 100)
+
+  const LEGEND = [
+    { label: 'Light', color: '#FFE66D' },
+    { label: 'Moderate', color: '#4ECDC4' },
+    { label: 'Heavy', color: '#FF6B6B' },
+  ]
 
   return (
     <div className="bodymap-root">
+
       {/* Header */}
       <div className="bodymap-header">
         <h1 className="bodymap-title">BODY MAP</h1>
-        <p className="bodymap-sub">Tap a muscle to see details</p>
+        <p className="bodymap-sub">Tap any muscle to see details</p>
       </div>
 
-      {/* Time filter */}
+      {/* Time Filter */}
       <div className="bodymap-filters">
-        {['week', 'month', 'all'].map((f) => (
+        {[
+          { key: 'week', label: 'THIS WEEK' },
+          { key: 'month', label: 'THIS MONTH' },
+          { key: 'all', label: 'ALL TIME' },
+        ].map((f) => (
           <button
-            key={f}
-            className={`bodymap-filter-btn ${timeFilter === f ? 'active' : ''}`}
-            onClick={() => setTimeFilter(f)}
+            key={f.key}
+            className={`bm-filter-btn ${timeFilter === f.key ? 'active' : ''}`}
+            onClick={() => setTimeFilter(f.key)}
           >
-            {f === 'week' ? 'THIS WEEK' : f === 'month' ? 'THIS MONTH' : 'ALL TIME'}
+            {f.label}
           </button>
         ))}
       </div>
 
-      {/* Coverage stat */}
-      <div className="bodymap-coverage">
-        <div className="coverage-bar-wrap">
-          <div className="coverage-bar">
-            <div
-              className="coverage-fill"
-              style={{ width: `${Math.round((trainedCount / totalMuscles) * 100)}%` }}
-            />
-          </div>
-          <span className="coverage-label">
-            {trainedCount}/{totalMuscles} muscle groups trained
+      {/* Coverage Card */}
+      <div className="bm-coverage-card">
+        <div className="bm-coverage-top">
+          <span className="bm-coverage-label">Muscle Coverage</span>
+          <span className="bm-coverage-num">
+            <span className="bm-coverage-trained">{trainedCount}</span>
+            <span className="bm-coverage-total">/{totalMuscles}</span>
           </span>
         </div>
+        <div className="bm-coverage-bar">
+          <div
+            className="bm-coverage-fill"
+            style={{ width: `${coveragePct}%` }}
+          />
+        </div>
+        <p className="bm-coverage-pct">
+          {coveragePct}% of muscle groups trained
+        </p>
       </div>
 
-      {/* Body charts — front and back side by side */}
-      <div className="bodymap-charts">
-        <div className="bodymap-chart-wrap">
-          <p className="chart-label">FRONT</p>
-          <div ref={frontRef} className="bodymap-chart" />
+      {/* Body Charts */}
+      <div className="bm-charts-wrap">
+        <div className="bm-chart-col">
+          <p className="bm-chart-label">FRONT</p>
+          <div ref={frontRef} className="bm-chart" />
         </div>
-        <div className="bodymap-chart-wrap">
-          <p className="chart-label">BACK</p>
-          <div ref={backRef} className="bodymap-chart" />
+        <div className="bm-chart-col">
+          <p className="bm-chart-label">BACK</p>
+          <div ref={backRef} className="bm-chart" />
         </div>
       </div>
+
+      {/* Loading overlay on charts */}
+      {loading && (
+        <div className="bm-loading">
+          <div className="bm-spinner" />
+          <p>Loading your data...</p>
+        </div>
+      )}
 
       {/* Legend */}
-      <div className="bodymap-legend">
-        <span className="legend-label">NOT TRAINED</span>
-        <div className="legend-scale">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-            <div
-              key={i}
-              className="legend-block"
-              style={{ opacity: i / 10 }}
-            />
-          ))}
+      <div className="bm-legend">
+        <div className="bm-legend-item">
+          <div className="bm-legend-swatch" style={{ background: '#2a2a35', border: '1px solid #444' }} />
+          <span>Not trained</span>
         </div>
-        <span className="legend-label">MOST TRAINED</span>
+        {LEGEND.map((l) => (
+          <div className="bm-legend-item" key={l.label}>
+            <div className="bm-legend-swatch" style={{ background: l.color }} />
+            <span>{l.label}</span>
+          </div>
+        ))}
       </div>
 
       {/* Empty state */}
       {!loading && workouts.length === 0 && (
-        <div className="bodymap-empty">
-          <p>💪</p>
-          <p>Log workouts to see your body map!</p>
+        <div className="bm-empty">
+          <p className="bm-empty-icon">💪</p>
+          <p className="bm-empty-text">No workouts logged yet</p>
+          <p className="bm-empty-sub">Start training to see your muscle map!</p>
         </div>
       )}
 
-      {/* Bottom sheet - selected muscle */}
+      {/* Bottom Sheet */}
       {selectedMuscle && (
-        <div className="muscle-sheet-overlay" onClick={() => setSelectedMuscle(null)}>
-          <div className="muscle-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="muscle-sheet-handle" />
-            <div className="muscle-sheet-header">
-              <h2 className="muscle-sheet-name">{selectedMuscle.name}</h2>
-              <span className="muscle-sheet-count">
-                {muscleCounts[selectedMuscle.id] || 0} times trained
-              </span>
-              <button className="muscle-sheet-close" onClick={() => setSelectedMuscle(null)}>✕</button>
+        <div
+          className="bm-sheet-overlay"
+          onClick={() => setSelectedMuscle(null)}
+        >
+          <div className="bm-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="bm-sheet-handle" />
+
+            <div className="bm-sheet-header">
+              <div className="bm-sheet-title-wrap">
+                <h2 className="bm-sheet-name">{selectedMuscle.name}</h2>
+                <p className="bm-sheet-hits">
+                  {Math.round(muscleCounts[selectedMuscle.id] || 0)} times trained
+                </p>
+              </div>
+              <div
+                className="bm-sheet-intensity"
+                style={{
+                  background: intensityToColor(
+                    Math.min(10, Math.round(
+                      ((muscleCounts[selectedMuscle.id] || 0) /
+                        Math.max(...Object.values(muscleCounts), 1)) * 10
+                    ))
+                  )
+                }}
+              />
+              <button
+                className="bm-sheet-close"
+                onClick={() => setSelectedMuscle(null)}
+              >✕</button>
             </div>
 
             {(() => {
-              const exercises = getExercisesForMuscle(selectedMuscle.id)
-              return exercises.length > 0 ? (
-                <div className="muscle-sheet-exercises">
-                  <p className="muscle-sheet-label">RECENT EXERCISES</p>
-                  {exercises.map((ex, i) => (
-                    <div className="muscle-ex-row" key={i}>
-                      <div className="muscle-ex-info">
-                        <span className="muscle-ex-name">{ex.name}</span>
-                        <span className="muscle-ex-date">{ex.date}</span>
+              const exs = getExercisesForMuscle(selectedMuscle.id)
+              return exs.length > 0 ? (
+                <div className="bm-sheet-exercises">
+                  <p className="bm-sheet-label">RECENT EXERCISES</p>
+                  {exs.map((ex, i) => (
+                    <div className="bm-ex-row" key={i}>
+                      <div className="bm-ex-left">
+                        <span className="bm-ex-name">{ex.name}</span>
+                        <span className="bm-ex-date">{ex.date}</span>
                       </div>
-                      <span className="muscle-ex-detail">
-                        {ex.sets && ex.reps ? `${ex.sets}×${ex.reps}` : ''}
-                        {ex.weight ? ` · ${ex.weight}kg` : ''}
+                      <span className={`bm-ex-tag ${ex.isPrimary ? 'primary' : 'secondary'}`}>
+                        {ex.isPrimary ? 'Primary' : 'Secondary'}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="muscle-sheet-none">No exercises recorded for this muscle yet.</p>
+                <p className="bm-sheet-none">
+                  No exercises recorded for this muscle yet.
+                </p>
               )
             })()}
           </div>
