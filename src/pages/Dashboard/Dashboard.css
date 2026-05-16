@@ -662,8 +662,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(249,115,22,0.08);
-  border: 1.5px solid rgba(249,115,22,0.25);
+  background: rgba(249,115,22,0.06);
+  border: 1.5px solid rgba(249,115,22,0.2);
   border-radius: 18px;
   padding: 14px 16px;
   margin-bottom: 16px;
