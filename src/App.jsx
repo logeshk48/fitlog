@@ -1,8 +1,6 @@
-import { useContext, useState, useEffect } from 'react'
+import { useContext } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthContext } from './context/AuthContext'
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
-import { db } from './firebase/config'
 import Layout from './components/Layout'
 import Login from './pages/Auth/Login'
 import Signup from './pages/Auth/Signup'
@@ -12,25 +10,9 @@ import Plans from './pages/Plans/Plans'
 import Stats from './pages/Stats/Stats'
 import BodyMap from './pages/BodyMap/BodyMap'
 import Profile from './pages/Profile/Profile'
-import AIBot from './components/AIBot'
 
 function App() {
   const { user, loading } = useContext(AuthContext)
-  const [workouts, setWorkouts] = useState([])
-  const [profile, setProfile] = useState({ goal: '', level: '', body: {} })
-
-  useEffect(() => {
-    if (!user) return
-    async function load() {
-      const q = query(collection(db, 'workouts'), where('userId', '==', user.uid))
-      const snap = await getDocs(q)
-      setWorkouts(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-
-      const pSnap = await getDoc(doc(db, 'profiles', user.uid))
-      if (pSnap.exists()) setProfile(pSnap.data())
-    }
-    load()
-  }, [user])
 
   if (loading) {
     return (
@@ -94,9 +76,6 @@ function App() {
           <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
-
-      {/* AIBot - global, hidden on /profile */}
-      {user && <AIBot workouts={workouts} profile={profile} />}
     </HashRouter>
   )
 }
