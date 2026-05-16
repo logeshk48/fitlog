@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 import { db } from '../../firebase'
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore'
+import { collection, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 
@@ -79,6 +79,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [streak, setStreak] = useState(0)
   const [weekWorkouts, setWeekWorkouts] = useState([])
+  const [profileComplete, setProfileComplete] = useState(true)
   const [stats, setStats] = useState({
     total: 0,
     bestLift: 0,
@@ -92,6 +93,7 @@ function Dashboard() {
     if (!user) return
     setLoading(true)
     try {
+      // Fetch active plan
       const planQ = query(
         collection(db, 'plans'),
         where('userId', '==', user.uid),
@@ -102,6 +104,7 @@ function Dashboard() {
         setActivePlan({ id: planSnap.docs[0].id, ...planSnap.docs[0].data() })
       }
 
+      // Fetch workouts
       const workoutQ = query(
         collection(db, 'workouts'),
         where('userId', '==', user.uid),
@@ -114,6 +117,17 @@ function Dashboard() {
       calculateStreak(allWorkouts)
       calculateWeekWorkouts(allWorkouts)
       calculateStats(allWorkouts)
+
+      // Check profile completeness
+      const profileRef = doc(db, 'profiles', user.uid)
+      const profileSnap = await getDoc(profileRef)
+      if (profileSnap.exists()) {
+        const p = profileSnap.data()
+        setProfileComplete(!!(p.height && p.weight && p.age))
+      } else {
+        setProfileComplete(false)
+      }
+
     } catch (err) {
       console.error(err)
     }
@@ -253,6 +267,21 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* ===== PROFILE ALERT ===== */}
+      {!profileComplete && (
+        <div
+          className="profile-alert"
+          onClick={() => navigate('/profile')}
+        >
+          <span className="profile-alert-icon">⚠️</span>
+          <div className="profile-alert-text">
+            <h4>Complete Your Profile</h4>
+            <p>Add height, weight & goals for better insights!</p>
+          </div>
+          <span className="profile-alert-arrow">›</span>
+        </div>
+      )}
+
       {/* ===== STREAK CARD ===== */}
       <div className="streak-card animate-2">
         <div className="streak-left">
@@ -294,7 +323,10 @@ function Dashboard() {
         {!activePlan ? (
           <div className="no-plan">
             <p>No active plan set</p>
-            <button className="create-plan-btn" onClick={() => navigate('/plans')}>
+            <button
+              className="create-plan-btn"
+              onClick={() => navigate('/plans')}
+            >
               Create Plan →
             </button>
           </div>

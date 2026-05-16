@@ -655,3 +655,58 @@
   line-height: 1.6;
   letter-spacing: 0.01em;
 }
+/* ================================
+   PROFILE ALERT
+================================ */
+.profile-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(249,115,22,0.08);
+  border: 1.5px solid rgba(249,115,22,0.25);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.4s ease 0.05s both;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-alert:hover {
+  background: rgba(249,115,22,0.12);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(249,115,22,0.15);
+}
+
+.profile-alert:active { transform: scale(0.98); }
+
+.profile-alert-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.profile-alert-text { flex: 1; }
+
+.profile-alert-text h4 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--color-orange);
+  margin-bottom: 2px;
+}
+
+.profile-alert-text p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.profile-alert-arrow {
+  font-size: 1.4rem;
+  color: var(--color-orange);
+  flex-shrink: 0;
+}
