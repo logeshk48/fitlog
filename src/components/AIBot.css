@@ -294,15 +294,38 @@
 /* Mobile */
 @media (max-width: 480px) {
   .fitbot-modal {
-    right: 0.75rem;
-    left: 0.75rem;
-    width: auto;
-    bottom: 9rem;
-    max-height: 420px;
-  }
+  position: fixed;
+  bottom: 9rem;
+  right: 1.25rem;
+  width: 320px;
+  max-height: 480px;
+  background: #1A1A24;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 299;        /* ← was 899, reduced */
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  animation: fitbot-slide-up 0.2s ease;
+}
 
   .fitbot-fab {
-    right: 0.75rem;
-    bottom: 5rem;
-  }
+  position: fixed;
+  bottom: 5rem;
+  right: 1.25rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 300;        /* ← was 900, reduced */
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.5);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
