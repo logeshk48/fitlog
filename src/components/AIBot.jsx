@@ -10,6 +10,7 @@ const QUICK_PROMPTS = [
 ];
 
 export default function AIBot({ workouts, profile }) {
+  // ✅ ALL hooks first — no early returns before this
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -17,16 +18,15 @@ export default function AIBot({ workouts, profile }) {
   const messagesEndRef = useRef(null);
   const location = useLocation();
 
-  // HashRouter: pathname is always '/', hash has the route
-  // So check window.location.hash instead
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  // ✅ Early return AFTER all hooks
   const isProfilePage = window.location.hash.includes('/profile');
   if (isProfilePage) return null;
-
-  function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  useEffect(() => { scrollToBottom(); }, [messages]);
 
   function buildSystemPrompt() {
     const typeCount = {};
@@ -34,7 +34,9 @@ export default function AIBot({ workouts, profile }) {
 
     let bestLift = 0;
     workouts.forEach((w) => {
-      w.exercises?.forEach((e) => { if (parseFloat(e.weight) > bestLift) bestLift = parseFloat(e.weight); });
+      w.exercises?.forEach((e) => {
+        if (parseFloat(e.weight) > bestLift) bestLift = parseFloat(e.weight);
+      });
       if (parseFloat(w.weight) > bestLift) bestLift = parseFloat(w.weight);
     });
 
@@ -67,9 +69,13 @@ Keep responses short and actionable. If suggesting a workout, format exercises a
     if (!workouts.length) return 0;
     const dates = workouts
       .filter((w) => w.createdAt)
-      .map((w) => { const d = w.createdAt.toDate ? w.createdAt.toDate() : new Date(w.createdAt); return d.toDateString(); });
+      .map((w) => {
+        const d = w.createdAt.toDate ? w.createdAt.toDate() : new Date(w.createdAt);
+        return d.toDateString();
+      });
     const unique = [...new Set(dates)].map((d) => new Date(d)).sort((a, b) => b - a);
-    let streak = 0, current = new Date();
+    let streak = 0;
+    let current = new Date();
     current.setHours(0, 0, 0, 0);
     for (const d of unique) {
       const diff = Math.round((current - d) / (1000 * 60 * 60 * 24));
@@ -163,7 +169,9 @@ Keep responses short and actionable. If suggesting a workout, format exercises a
           <div className="fitbot-messages">
             {messages.map((m, i) => (
               <div key={i} className={`fitbot-msg ${m.role}`}>
-                {m.role === 'assistant' && <span className="fitbot-msg-avatar">✦</span>}
+                {m.role === 'assistant' && (
+                  <span className="fitbot-msg-avatar">✦</span>
+                )}
                 <div className="fitbot-bubble">
                   {m.content.split('\n').map((line, j) => (
                     line ? <p key={j} className="fitbot-line">{line}</p> : null
@@ -187,7 +195,11 @@ Keep responses short and actionable. If suggesting a workout, format exercises a
           {messages.length <= 1 && (
             <div className="fitbot-quick">
               {QUICK_PROMPTS.map((q) => (
-                <button key={q} className="fitbot-quick-btn" onClick={() => sendMessage(q)}>
+                <button
+                  key={q}
+                  className="fitbot-quick-btn"
+                  onClick={() => sendMessage(q)}
+                >
                   {q}
                 </button>
               ))}

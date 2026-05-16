@@ -1,8 +1,9 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext, useRef } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 import { db } from '../../firebase'
 import { collection, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
+import { BodyChart, ViewSide } from 'body-muscles'
 import './Dashboard.css'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -71,6 +72,155 @@ function StatsGrid({ stats }) {
   )
 }
 
+// Muscle mapping for body map card
+const EXERCISE_MUSCLE_MAP = {
+  'bench press': ['chest-upper-left', 'chest-upper-right', 'chest-lower-left', 'chest-lower-right'],
+  'chest press': ['chest-upper-left', 'chest-upper-right'],
+  'push up': ['chest-upper-left', 'chest-upper-right', 'triceps-left', 'triceps-right'],
+  'chest fly': ['chest-upper-left', 'chest-upper-right', 'chest-lower-left', 'chest-lower-right'],
+  'incline press': ['chest-upper-left', 'chest-upper-right'],
+  'decline press': ['chest-lower-left', 'chest-lower-right'],
+  'pull up': ['latissimus-dorsi-left', 'latissimus-dorsi-right', 'biceps-left', 'biceps-right'],
+  'lat pulldown': ['latissimus-dorsi-left', 'latissimus-dorsi-right'],
+  'row': ['latissimus-dorsi-left', 'latissimus-dorsi-right', 'trapezius-middle-left', 'trapezius-middle-right'],
+  'deadlift': ['latissimus-dorsi-left', 'latissimus-dorsi-right', 'gluteus-maximus-left', 'gluteus-maximus-right', 'hamstrings-left', 'hamstrings-right'],
+  'shoulder press': ['deltoid-anterior-left', 'deltoid-anterior-right', 'deltoid-lateral-left', 'deltoid-lateral-right'],
+  'lateral raise': ['deltoid-lateral-left', 'deltoid-lateral-right'],
+  'overhead press': ['deltoid-anterior-left', 'deltoid-anterior-right', 'triceps-left', 'triceps-right'],
+  'curl': ['biceps-left', 'biceps-right'],
+  'bicep curl': ['biceps-left', 'biceps-right'],
+  'hammer curl': ['biceps-left', 'biceps-right', 'brachioradialis-left', 'brachioradialis-right'],
+  'tricep': ['triceps-left', 'triceps-right'],
+  'triceps': ['triceps-left', 'triceps-right'],
+  'dip': ['triceps-left', 'triceps-right', 'chest-lower-left', 'chest-lower-right'],
+  'squat': ['quadriceps-left', 'quadriceps-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
+  'leg press': ['quadriceps-left', 'quadriceps-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
+  'lunge': ['quadriceps-left', 'quadriceps-right', 'gluteus-maximus-left', 'gluteus-maximus-right'],
+  'leg extension': ['quadriceps-left', 'quadriceps-right'],
+  'leg curl': ['hamstrings-left', 'hamstrings-right'],
+  'calf raise': ['gastrocnemius-left', 'gastrocnemius-right'],
+  'hip thrust': ['gluteus-maximus-left', 'gluteus-maximus-right'],
+  'glute bridge': ['gluteus-maximus-left', 'gluteus-maximus-right'],
+  'crunch': ['rectus-abdominis-upper', 'rectus-abdominis-lower'],
+  'plank': ['rectus-abdominis-upper', 'rectus-abdominis-lower', 'obliques-left', 'obliques-right'],
+  'sit up': ['rectus-abdominis-upper', 'rectus-abdominis-lower'],
+  'shrug': ['trapezius-upper-left', 'trapezius-upper-right'],
+}
+
+const TYPE_MUSCLE_MAP = {
+  strength: ['chest-upper-left', 'chest-upper-right', 'biceps-left', 'biceps-right', 'triceps-left', 'triceps-right'],
+  cardio: ['quadriceps-left', 'quadriceps-right', 'hamstrings-left', 'hamstrings-right', 'gastrocnemius-left', 'gastrocnemius-right'],
+  flexibility: ['hamstrings-left', 'hamstrings-right', 'obliques-left', 'obliques-right'],
+  sports: ['quadriceps-left', 'quadriceps-right', 'deltoid-lateral-left', 'deltoid-lateral-right'],
+}
+
+function getWeekMuscleCounts(workouts) {
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const filtered = workouts.filter((w) => {
+    const d = w.createdAt?.toDate?.() || new Date(w.date)
+    return d >= oneWeekAgo
+  })
+  const counts = {}
+  filtered.forEach((w) => {
+    const musclesHit = new Set()
+    if (w.exercises?.length) {
+      w.exercises.forEach((ex) => {
+        const name = ex.name?.toLowerCase() || ''
+        Object.entries(EXERCISE_MUSCLE_MAP).forEach(([key, muscles]) => {
+          if (name.includes(key)) muscles.forEach((m) => musclesHit.add(m))
+        })
+      })
+    }
+    if (musclesHit.size === 0 && w.type) {
+      const defaults = TYPE_MUSCLE_MAP[w.type] || []
+      defaults.forEach((m) => musclesHit.add(m))
+    }
+    musclesHit.forEach((m) => { counts[m] = (counts[m] || 0) + 1 })
+  })
+  return counts
+}
+
+function MiniBodyMap({ workouts }) {
+  const frontRef = useRef(null)
+  const backRef = useRef(null)
+  const frontChartRef = useRef(null)
+  const backChartRef = useRef(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!frontRef.current || !backRef.current) return
+
+    frontChartRef.current = new BodyChart(frontRef.current, {
+      view: ViewSide.FRONT,
+      bodyState: {},
+      showViewLabel: false,
+      enableTransitions: true,
+    })
+
+    backChartRef.current = new BodyChart(backRef.current, {
+      view: ViewSide.BACK,
+      bodyState: {},
+      showViewLabel: false,
+      enableTransitions: true,
+    })
+
+    return () => {
+      frontChartRef.current?.destroy()
+      backChartRef.current?.destroy()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!workouts.length) return
+    const counts = getWeekMuscleCounts(workouts)
+    const max = Math.max(...Object.values(counts), 1)
+    const bodyState = {}
+    Object.entries(counts).forEach(([id, count]) => {
+      bodyState[id] = {
+        intensity: Math.min(10, Math.round((count / max) * 10)),
+        selected: false,
+      }
+    })
+    frontChartRef.current?.update({ bodyState })
+    backChartRef.current?.update({ bodyState })
+  }, [workouts])
+
+  const counts = getWeekMuscleCounts(workouts)
+  const trained = Object.keys(counts).length
+  const total = 20
+
+  return (
+    <div className="mini-bodymap-card animate-7" onClick={() => navigate('/bodymap')}>
+      <div className="mini-bodymap-header">
+        <div>
+          <h3 className="mini-bodymap-title">Muscle Coverage</h3>
+          <p className="mini-bodymap-sub">This week · Tap to explore</p>
+        </div>
+        <span className="mini-bodymap-count">
+          {trained}/{total}
+        </span>
+      </div>
+
+      <div className="mini-bodymap-charts">
+        <div ref={frontRef} className="mini-bodymap-svg" />
+        <div ref={backRef} className="mini-bodymap-svg" />
+      </div>
+
+      <div className="mini-bodymap-bar-wrap">
+        <div className="mini-bodymap-bar">
+          <div
+            className="mini-bodymap-fill"
+            style={{ width: `${Math.round((trained / total) * 100)}%` }}
+          />
+        </div>
+        <span className="mini-bodymap-pct">
+          {Math.round((trained / total) * 100)}% covered
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function Dashboard() {
   const { user } = useContext(AuthContext)
   const navigate = useNavigate()
@@ -93,7 +243,6 @@ function Dashboard() {
     if (!user) return
     setLoading(true)
     try {
-      // Fetch active plan
       const planQ = query(
         collection(db, 'plans'),
         where('userId', '==', user.uid),
@@ -104,7 +253,6 @@ function Dashboard() {
         setActivePlan({ id: planSnap.docs[0].id, ...planSnap.docs[0].data() })
       }
 
-      // Fetch workouts
       const workoutQ = query(
         collection(db, 'workouts'),
         where('userId', '==', user.uid),
@@ -118,7 +266,6 @@ function Dashboard() {
       calculateWeekWorkouts(allWorkouts)
       calculateStats(allWorkouts)
 
-      // Check profile completeness
       const profileRef = doc(db, 'profiles', user.uid)
       const profileSnap = await getDoc(profileRef)
       if (profileSnap.exists()) {
@@ -396,6 +543,9 @@ function Dashboard() {
         <span className="insight-icon">💡</span>
         <p className="insight-text">{getInsight()}</p>
       </div>
+
+      {/* ===== MINI BODY MAP ===== */}
+      <MiniBodyMap workouts={workouts} />
 
     </div>
   )
