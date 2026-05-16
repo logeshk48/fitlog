@@ -17,9 +17,10 @@ export default function AIBot({ workouts, profile }) {
   const messagesEndRef = useRef(null);
   const location = useLocation();
 
-  // Hide on profile page
-  if (location.pathname === '/profile') return null;
-// HashRouter uses hash, so pathname is still /profile — this works fine ✓
+  // HashRouter: pathname is always '/', hash has the route
+  // So check window.location.hash instead
+  const isProfilePage = window.location.hash.includes('/profile');
+  if (isProfilePage) return null;
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,7 +134,10 @@ Keep responses short and actionable. If suggesting a workout, format exercises a
   return (
     <>
       {/* Floating button */}
-      <button className={`fitbot-fab ${open ? 'open' : ''}`} onClick={open ? () => setOpen(false) : handleOpen}>
+      <button
+        className={`fitbot-fab ${open ? 'open' : ''}`}
+        onClick={open ? () => setOpen(false) : handleOpen}
+      >
         {open ? '✕' : '✦'}
       </button>
 
@@ -162,7 +166,7 @@ Keep responses short and actionable. If suggesting a workout, format exercises a
                 {m.role === 'assistant' && <span className="fitbot-msg-avatar">✦</span>}
                 <div className="fitbot-bubble">
                   {m.content.split('\n').map((line, j) => (
-                    <p key={j} className="fitbot-line">{line}</p>
+                    line ? <p key={j} className="fitbot-line">{line}</p> : null
                   ))}
                 </div>
               </div>
