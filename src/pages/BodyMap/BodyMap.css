@@ -214,7 +214,7 @@
 .bm-legend-item span {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.68rem;
-  color: #A0A0B8;
+  color: #C0C0D0;  /* brighter than before */
 }
 
 /* Empty state */

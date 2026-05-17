@@ -4,6 +4,7 @@ import { db } from '../../firebase'
 import { collection, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 import { BodyChart, ViewSide } from 'body-muscles'
+import { MUSCLE_ID_MAP, MUSCLE_GROUPS_LIST } from '../../data/muscleMap'
 import './Dashboard.css'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -186,8 +187,12 @@ function MiniBodyMap({ workouts }) {
   }, [workouts])
 
   const counts = getWeekMuscleCounts(workouts)
-  const trained = Object.keys(counts).length
-  const total = 20
+  const GROUPS = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms', 'Core', 'Legs', 'Glutes', 'Calves', 'Full Body']
+  const trained = GROUPS.filter((g) => {
+    const ids = MUSCLE_ID_MAP[g] || []
+    return ids.some((id) => counts[id] && counts[id] > 0)
+  }).length
+  const total = 11
 
   return (
     <div className="mini-bodymap-card animate-7" onClick={() => navigate('/bodymap')}>

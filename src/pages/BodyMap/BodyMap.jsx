@@ -3,112 +3,13 @@ import { BodyChart, ViewSide } from 'body-muscles'
 import { AuthContext } from '../../context/AuthContext'
 import { getWorkouts } from '../../hooks/useFirestore'
 import { exercises as exerciseLibrary } from '../../data/exercises'
+import { MUSCLE_ID_MAP, MUSCLE_GROUPS_LIST } from '../../data/muscleMap'
 import './BodyMap.css'
 
 // ================================
 // MUSCLE GROUP → BODY-MUSCLES IDS
 // ================================
-const MUSCLE_ID_MAP = {
-  'Chest': [
-    'chest-upper-right', 'chest-upper-left',
-    'chest-lower-right', 'chest-lower-left',
-    'serratus-anterior-right', 'serratus-anterior-left',
-  ],
-  'Back': [
-    'traps-upper-right', 'traps-upper-left',
-    'traps-mid-right', 'traps-mid-left',
-    'traps-lower-right', 'traps-lower-left',
-    'lats-upper-right', 'lats-upper-left',
-    'lats-mid-right', 'lats-mid-left',
-    'lats-lower-right', 'lats-lower-left',
-    'spine',
-    'lower-back-ql-right', 'lower-back-ql-left',
-    'lower-back-erectors-right', 'lower-back-erectors-left',
-  ],
-  'Shoulders': [
-    'shoulder-front-right', 'shoulder-front-left',
-    'shoulder-side-right', 'shoulder-side-left',
-    'deltoid-rear-right', 'deltoid-rear-left',
-  ],
-  'Biceps': [
-    'biceps-right', 'biceps-left',
-  ],
-  'Triceps': [
-    'triceps-lateral-right', 'triceps-lateral-left',
-    'triceps-long-right', 'triceps-long-left',
-  ],
-  'Forearms': [
-    'forearm-right', 'forearm-left',
-    'forearm-flexors-right', 'forearm-flexors-left',
-    'forearm-extensors-right', 'forearm-extensors-left',
-  ],
-  'Core': [
-    'abs-upper-right', 'abs-upper-left',
-    'abs-lower-right', 'abs-lower-left',
-    'obliques-right', 'obliques-left',
-    'hip-flexor-right', 'hip-flexor-left',
-    'serratus-anterior-right', 'serratus-anterior-left',
-  ],
-  'Legs': [
-    'quads-right', 'quads-left',
-    'hamstrings-medial-right', 'hamstrings-medial-left',
-    'hamstrings-lateral-right', 'hamstrings-lateral-left',
-    'adductors-right', 'adductors-left',
-    'tibialis-anterior-right', 'tibialis-anterior-left',
-    'knee-right', 'knee-left',
-    'knee-back-right', 'knee-back-left',
-  ],
-  'Glutes': [
-    'gluteus-medius-right', 'gluteus-medius-left',
-    'gluteus-maximus-right', 'gluteus-maximus-left',
-  ],
-  'Calves': [
-    'calves-gastroc-medial-right', 'calves-gastroc-medial-left',
-    'calves-gastroc-lateral-right', 'calves-gastroc-lateral-left',
-    'calves-soleus-right', 'calves-soleus-left',
-  ],
-  'Full Body': [
-    'chest-upper-right', 'chest-upper-left',
-    'chest-lower-right', 'chest-lower-left',
-    'serratus-anterior-right', 'serratus-anterior-left',
-    'traps-upper-right', 'traps-upper-left',
-    'lats-upper-right', 'lats-upper-left',
-    'lower-back-erectors-right', 'lower-back-erectors-left',
-    'shoulder-front-right', 'shoulder-front-left',
-    'shoulder-side-right', 'shoulder-side-left',
-    'deltoid-rear-right', 'deltoid-rear-left',
-    'biceps-right', 'biceps-left',
-    'triceps-lateral-right', 'triceps-lateral-left',
-    'triceps-long-right', 'triceps-long-left',
-    'forearm-right', 'forearm-left',
-    'abs-upper-right', 'abs-upper-left',
-    'abs-lower-right', 'abs-lower-left',
-    'obliques-right', 'obliques-left',
-    'quads-right', 'quads-left',
-    'hamstrings-medial-right', 'hamstrings-medial-left',
-    'hamstrings-lateral-right', 'hamstrings-lateral-left',
-    'gluteus-maximus-right', 'gluteus-maximus-left',
-    'gluteus-medius-right', 'gluteus-medius-left',
-    'calves-gastroc-lateral-right', 'calves-gastroc-lateral-left',
-    'calves-soleus-right', 'calves-soleus-left',
-  ],
-  // Secondary muscle aliases
-  'Hamstrings': [
-    'hamstrings-medial-right', 'hamstrings-medial-left',
-    'hamstrings-lateral-right', 'hamstrings-lateral-left',
-  ],
-  'Lower Back': [
-    'lower-back-erectors-right', 'lower-back-erectors-left',
-    'lower-back-ql-right', 'lower-back-ql-left',
-  ],
-  'Hip Flexors': ['hip-flexor-right', 'hip-flexor-left'],
-  'Obliques': ['obliques-right', 'obliques-left'],
-  'Lower Abs': ['abs-lower-right', 'abs-lower-left'],
-  'Upper Back': [
-    'traps-upper-right', 'traps-upper-left',
-    'traps-mid-right', 'traps-mid-left',
-  ],
-}
+
 
 // ================================
 // INTENSITY → COLOR (shades)
@@ -333,8 +234,13 @@ export default function BodyMap() {
   }
 
   // Cap at totalMuscles to avoid > 100%
-  const totalMuscles = 20
-  const trainedCount = Math.min(Object.keys(muscleCounts).length, totalMuscles)
+  const totalMuscles = 11 
+  const MUSCLE_GROUPS_LIST = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms', 'Core', 'Legs', 'Glutes', 'Calves', 'Full Body']
+  const trainedGroups = MUSCLE_GROUPS_LIST.filter((group) => {
+    const ids = MUSCLE_ID_MAP[group] || []
+    return ids.some((id) => muscleCounts[id] && muscleCounts[id] > 0)
+  })
+  const trainedCount = trainedGroups.length
   const coveragePct = Math.min(Math.round((trainedCount / totalMuscles) * 100), 100)
 
   const LEGEND = [

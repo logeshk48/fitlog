@@ -1,0 +1,102 @@
+export const MUSCLE_ID_MAP = {
+  'Chest': [
+    'chest-upper-right', 'chest-upper-left',
+    'chest-lower-right', 'chest-lower-left',
+    'serratus-anterior-right', 'serratus-anterior-left',
+  ],
+  'Back': [
+    'traps-upper-right', 'traps-upper-left',
+    'traps-mid-right', 'traps-mid-left',
+    'traps-lower-right', 'traps-lower-left',
+    'lats-upper-right', 'lats-upper-left',
+    'lats-mid-right', 'lats-mid-left',
+    'lats-lower-right', 'lats-lower-left',
+    'spine',
+    'lower-back-ql-right', 'lower-back-ql-left',
+    'lower-back-erectors-right', 'lower-back-erectors-left',
+  ],
+  'Shoulders': [
+    'shoulder-front-right', 'shoulder-front-left',
+    'shoulder-side-right', 'shoulder-side-left',
+    'deltoid-rear-right', 'deltoid-rear-left',
+  ],
+  'Biceps': ['biceps-right', 'biceps-left'],
+  'Triceps': [
+    'triceps-lateral-right', 'triceps-lateral-left',
+    'triceps-long-right', 'triceps-long-left',
+  ],
+  'Forearms': [
+    'forearm-right', 'forearm-left',
+    'forearm-flexors-right', 'forearm-flexors-left',
+    'forearm-extensors-right', 'forearm-extensors-left',
+  ],
+  'Core': [
+    'abs-upper-right', 'abs-upper-left',
+    'abs-lower-right', 'abs-lower-left',
+    'obliques-right', 'obliques-left',
+    'hip-flexor-right', 'hip-flexor-left',
+    'serratus-anterior-right', 'serratus-anterior-left',
+  ],
+  'Legs': [
+    'quads-right', 'quads-left',
+    'hamstrings-medial-right', 'hamstrings-medial-left',
+    'hamstrings-lateral-right', 'hamstrings-lateral-left',
+    'adductors-right', 'adductors-left',
+    'tibialis-anterior-right', 'tibialis-anterior-left',
+    'knee-right', 'knee-left',
+    'knee-back-right', 'knee-back-left',
+  ],
+  'Glutes': [
+    'gluteus-medius-right', 'gluteus-medius-left',
+    'gluteus-maximus-right', 'gluteus-maximus-left',
+  ],
+  'Calves': [
+    'calves-gastroc-medial-right', 'calves-gastroc-medial-left',
+    'calves-gastroc-lateral-right', 'calves-gastroc-lateral-left',
+    'calves-soleus-right', 'calves-soleus-left',
+  ],
+  'Full Body': [
+    'chest-upper-right', 'chest-upper-left',
+    'chest-lower-right', 'chest-lower-left',
+    'serratus-anterior-right', 'serratus-anterior-left',
+    'traps-upper-right', 'traps-upper-left',
+    'lats-upper-right', 'lats-upper-left',
+    'lower-back-erectors-right', 'lower-back-erectors-left',
+    'shoulder-front-right', 'shoulder-front-left',
+    'shoulder-side-right', 'shoulder-side-left',
+    'deltoid-rear-right', 'deltoid-rear-left',
+    'biceps-right', 'biceps-left',
+    'triceps-lateral-right', 'triceps-lateral-left',
+    'triceps-long-right', 'triceps-long-left',
+    'forearm-right', 'forearm-left',
+    'abs-upper-right', 'abs-upper-left',
+    'abs-lower-right', 'abs-lower-left',
+    'obliques-right', 'obliques-left',
+    'quads-right', 'quads-left',
+    'hamstrings-medial-right', 'hamstrings-medial-left',
+    'gluteus-maximus-right', 'gluteus-maximus-left',
+    'gluteus-medius-right', 'gluteus-medius-left',
+    'calves-gastroc-lateral-right', 'calves-gastroc-lateral-left',
+    'calves-soleus-right', 'calves-soleus-left',
+  ],
+  'Hamstrings': [
+    'hamstrings-medial-right', 'hamstrings-medial-left',
+    'hamstrings-lateral-right', 'hamstrings-lateral-left',
+  ],
+  'Lower Back': [
+    'lower-back-erectors-right', 'lower-back-erectors-left',
+    'lower-back-ql-right', 'lower-back-ql-left',
+  ],
+  'Hip Flexors': ['hip-flexor-right', 'hip-flexor-left'],
+  'Obliques': ['obliques-right', 'obliques-left'],
+  'Lower Abs': ['abs-lower-right', 'abs-lower-left'],
+  'Upper Back': [
+    'traps-upper-right', 'traps-upper-left',
+    'traps-mid-right', 'traps-mid-left',
+  ],
+}
+
+export const MUSCLE_GROUPS_LIST = [
+  'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps',
+  'Forearms', 'Core', 'Legs', 'Glutes', 'Calves', 'Full Body'
+]
