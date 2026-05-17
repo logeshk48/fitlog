@@ -8,7 +8,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 /* ================================
@@ -47,9 +47,9 @@
    GREETING
 ================================ */
 .greeting {
+  padding-left: 4px;  /* add this */
   padding-bottom: 4px;
 }
-
 .greeting-time {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.62rem;
