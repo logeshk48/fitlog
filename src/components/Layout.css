@@ -9,6 +9,23 @@
   position: relative;
 }
 
+/* Global app background - shows on ALL pages */
+.app-layout::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--app-bg);
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ================================
    MAIN CONTENT
 ================================ */
@@ -17,6 +34,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: var(--bottom-nav-height);
+  position: relative;
+  z-index: 1;
 }
 
 /* ================================
