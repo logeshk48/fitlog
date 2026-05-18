@@ -2,7 +2,7 @@
    DASHBOARD
 ================================ */
 .dashboard {
-  padding: 24px 16px 120px;
+  padding: 24px 16px 120px 20px; /* increase left padding */
   max-width: 480px;
   margin: 0 auto;
   position: relative;
@@ -47,10 +47,12 @@
    GREETING
 ================================ */
 .greeting {
-  padding-left: 4px;  /* add this */
+  padding-left: 8px;
   padding-bottom: 4px;
 }
+
 .greeting-time {
+  padding-left: 2px;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.62rem;
   font-weight: 700;
