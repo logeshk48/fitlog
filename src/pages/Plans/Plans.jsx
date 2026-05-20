@@ -119,7 +119,7 @@ function DayPillsRow({ schedule, todayIndex }) {
               className="pl-pill-muscle"
               style={hasWorkout ? { color: color } : {}}
             >
-              {isRest ? 'REST' : d?.primary ? d.primary.slice(0, 4).toUpperCase() : '—'}
+              {isRest ? 'REST' : d?.primary ? d.primary.slice(0, 5).toUpperCase() : '—'}
             </span>
           </motion.div>
         )
