@@ -5,6 +5,8 @@ import {
   collection, addDoc, getDocs, updateDoc,
   deleteDoc, doc, query, where, serverTimestamp
 } from 'firebase/firestore'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft, Plus, Check, Trash2, Pencil, Calendar, ChevronDown, ChevronUp, Zap } from 'lucide-react'
 import './Plans.css'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -15,11 +17,24 @@ const MUSCLE_OPTIONS = [
   'Forearms', 'Core', 'Legs', 'Glutes', 'Calves', 'Full Body', 'Cardio'
 ]
 
+const MUSCLE_COLORS = {
+  'Chest': '#FF6B6B', 'Back': '#4ECDC4', 'Shoulders': '#A855F7',
+  'Biceps': '#3B82F6', 'Triceps': '#F97316', 'Forearms': '#FFE66D',
+  'Core': '#22C55E', 'Legs': '#EC4899', 'Glutes': '#FF8E53',
+  'Calves': '#4d9fff', 'Full Body': '#FFE66D', 'Cardio': '#FF6B6B'
+}
+
 const defaultSchedule = () =>
   FULL_DAYS.reduce((acc, day) => ({
     ...acc,
     [day]: { primary: '', secondary: [], isRest: false }
   }), {})
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] }
+})
 
 function Plans() {
   const { user } = useContext(AuthContext)
@@ -64,8 +79,8 @@ function Plans() {
         [day]: {
           ...prev[day],
           secondary: current.includes(muscle)
-          ? current.filter(m => m !== muscle)
-          : [...current, muscle]
+            ? current.filter(m => m !== muscle)
+            : [...current, muscle]
         }
       }
     })
@@ -74,11 +89,7 @@ function Plans() {
   const toggleRest = (day) => {
     setSchedule(prev => ({
       ...prev,
-      [day]: {
-        primary: '',
-        secondary: [],
-        isRest: !prev[day]?.isRest
-      }
+      [day]: { primary: '', secondary: [], isRest: !prev[day]?.isRest }
     }))
   }
 
@@ -88,17 +99,12 @@ function Plans() {
     try {
       if (editPlan) {
         await updateDoc(doc(db, 'plans', editPlan.id), {
-          name: planName,
-          schedule,
-          updatedAt: serverTimestamp()
+          name: planName, schedule, updatedAt: serverTimestamp()
         })
       } else {
         await addDoc(collection(db, 'plans'), {
-          userId: user.uid,
-          name: planName,
-          schedule,
-          isActive: plans.length === 0,
-          createdAt: serverTimestamp()
+          userId: user.uid, name: planName, schedule,
+          isActive: plans.length === 0, createdAt: serverTimestamp()
         })
       }
       await fetchPlans()
@@ -113,9 +119,7 @@ function Plans() {
   const setActive = async (planId) => {
     try {
       for (const plan of plans) {
-        await updateDoc(doc(db, 'plans', plan.id), {
-          isActive: plan.id === planId
-        })
+        await updateDoc(doc(db, 'plans', plan.id), { isActive: plan.id === planId })
       }
       await fetchPlans()
     } catch (err) { console.error(err) }
@@ -146,8 +150,7 @@ function Plans() {
   const getTodayMuscles = (plan) => {
     const dayIndex = new Date().getDay()
     const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
-    const today = FULL_DAYS[adjustedIndex]
-    const d = plan.schedule?.[today]
+    const d = plan.schedule?.[FULL_DAYS[adjustedIndex]]
     return {
       primary: d?.primary || '',
       secondary: Array.isArray(d?.secondary) ? d.secondary : [],
@@ -173,82 +176,134 @@ function Plans() {
   if (showCreate) {
     return (
       <div className="plans-page">
-        <div className="plans-header">
-          <button className="back-btn" onClick={resetForm}>←</button>
-          <h1>{editPlan ? 'Edit Plan' : 'New Plan'}</h1>
-          <button
-            className="save-plan-btn"
+        {/* Header */}
+        <div className="pl-header">
+          <motion.button
+            className="pl-back-btn"
+            onClick={resetForm}
+            whileTap={{ scale: 0.9 }}
+          >
+            <ArrowLeft size={18} />
+          </motion.button>
+          <h1 className="pl-title">{editPlan ? 'EDIT PLAN' : 'NEW PLAN'}</h1>
+          <motion.button
+            className="pl-save-btn"
             onClick={savePlan}
             disabled={saving || !planName.trim()}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.04 }}
           >
-            {saving ? '...' : 'Save'}
-          </button>
+            {saving ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              >
+                <Zap size={14} />
+              </motion.div>
+            ) : (
+              <>
+                <Check size={14} />
+                SAVE
+              </>
+            )}
+          </motion.button>
         </div>
 
         {/* Plan Name */}
-        <div className="plan-name-input">
+        <motion.div className="pl-name-wrap" {...fadeUp(0.05)}>
           <input
             type="text"
             placeholder="Plan name (e.g. My Bulk Split)"
             value={planName}
             onChange={e => setPlanName(e.target.value)}
-            className="name-input"
+            className="pl-name-input"
           />
-        </div>
+        </motion.div>
 
         {/* Schedule */}
-        <div className="schedule-builder">
+        <div className="pl-schedule">
           {FULL_DAYS.map((day, i) => (
-            <div key={day} className="day-block">
-
-              {/* Day header */}
-              <div className="day-label">
-                <span className="day-short">{DAYS[i]}</span>
-                <span className="day-muscles-preview">{getDayPreview(day)}</span>
+            <motion.div
+              key={day}
+              className="pl-day-block"
+              {...fadeUp(0.05 + i * 0.04)}
+            >
+              <div className="pl-day-header">
+                <div className="pl-day-left">
+                  <span className="pl-day-short">{DAYS[i]}</span>
+                  <span className="pl-day-preview">
+                    {getDayPreview(day)}
+                  </span>
+                </div>
+                <motion.button
+                  className={`pl-rest-btn ${schedule[day]?.isRest ? 'active' : ''}`}
+                  onClick={() => toggleRest(day)}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  {schedule[day]?.isRest ? <><Check size={11} /> Rest</> : 'Rest Day'}
+                </motion.button>
               </div>
 
-              {/* Rest toggle */}
-              <button
-                className={`rest-toggle ${schedule[day]?.isRest ? 'active' : ''}`}
-                onClick={() => toggleRest(day)}
-              >
-                {schedule[day]?.isRest ? '✓ Rest Day' : 'Mark as Rest'}
-              </button>
+              <AnimatePresence>
+                {!schedule[day]?.isRest && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <p className="pl-muscle-label">PRIMARY</p>
+                    <div className="pl-chips">
+                      {MUSCLE_OPTIONS.map(muscle => {
+                        const isActive = schedule[day]?.primary === muscle
+                        const color = MUSCLE_COLORS[muscle]
+                        return (
+                          <motion.button
+                            key={muscle}
+                            className={`pl-chip pl-primary-chip ${isActive ? 'active' : ''}`}
+                            style={isActive ? {
+                              background: `${color}20`,
+                              borderColor: color,
+                              color: color,
+                              boxShadow: `0 3px 12px ${color}30`
+                            } : {}}
+                            onClick={() => togglePrimary(day, muscle)}
+                            whileTap={{ scale: 0.92 }}
+                          >
+                            {muscle}
+                          </motion.button>
+                        )
+                      })}
+                    </div>
 
-              {!schedule[day]?.isRest && (
-                <>
-                  {/* Primary */}
-                  <div className="muscle-section-label">Primary Muscle</div>
-                  <div className="muscle-chips">
-                    {MUSCLE_OPTIONS.map(muscle => (
-                      <button
-                        key={muscle}
-                        className={`muscle-chip primary-chip ${schedule[day]?.primary === muscle ? 'active' : ''}`}
-                        onClick={() => togglePrimary(day, muscle)}
-                      >
-                        {muscle}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Secondary */}
-                  <div className="muscle-section-label">Secondary Muscles</div>
-                  <div className="muscle-chips">
-                    {MUSCLE_OPTIONS
-                      .filter(m => m !== schedule[day]?.primary)
-                      .map(muscle => (
-                        <button
-                          key={muscle}
-                          className={`muscle-chip secondary-chip ${schedule[day]?.secondary?.includes(muscle) ? 'active' : ''}`}
-                          onClick={() => toggleSecondary(day, muscle)}
-                        >
-                          {muscle}
-                        </button>
-                      ))}
-                  </div>
-                </>
-              )}
-            </div>
+                    <p className="pl-muscle-label">SECONDARY</p>
+                    <div className="pl-chips">
+                      {MUSCLE_OPTIONS
+                        .filter(m => m !== schedule[day]?.primary)
+                        .map(muscle => {
+                          const isActive = schedule[day]?.secondary?.includes(muscle)
+                          const color = MUSCLE_COLORS[muscle]
+                          return (
+                            <motion.button
+                              key={muscle}
+                              className={`pl-chip pl-secondary-chip ${isActive ? 'active' : ''}`}
+                              style={isActive ? {
+                                background: `${color}15`,
+                                borderColor: `${color}60`,
+                                color: color,
+                              } : {}}
+                              onClick={() => toggleSecondary(day, muscle)}
+                              whileTap={{ scale: 0.92 }}
+                            >
+                              {muscle}
+                            </motion.button>
+                          )
+                        })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -260,132 +315,233 @@ function Plans() {
   // ================================
   return (
     <div className="plans-page">
-      <div className="plans-header">
-        <h1>My Plans</h1>
-        <button className="new-plan-btn" onClick={() => setShowCreate(true)}>
-          + New
-        </button>
-      </div>
 
-      {loading ? (
-        <div className="plans-loading">Loading...</div>
-      ) : plans.length === 0 ? (
-        <div className="plans-empty">
-          <div className="empty-icon">📅</div>
-          <h3>No plans yet</h3>
-          <p>Create your first workout plan!</p>
-          <button className="create-first-btn" onClick={() => setShowCreate(true)}>
-            Create Plan
-          </button>
+      {/* Header */}
+      <motion.div className="pl-header" {...fadeUp(0)}>
+        <h1 className="pl-title">MY PLANS</h1>
+        <motion.button
+          className="pl-new-btn"
+          onClick={() => setShowCreate(true)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Plus size={16} />
+          NEW
+        </motion.button>
+      </motion.div>
+
+      {/* Loading */}
+      {loading && (
+        <div className="pl-loading">
+          {[1,2,3].map(i => (
+            <motion.div
+              key={i}
+              className="pl-skeleton"
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.15 }}
+            />
+          ))}
         </div>
-      ) : (
-        <div className="plans-list">
+      )}
+
+      {/* Empty State */}
+      {!loading && plans.length === 0 && (
+        <motion.div className="pl-empty" {...fadeUp(0.1)}>
+          <motion.div
+            className="pl-empty-icon"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+          >
+            <Calendar size={48} color="rgba(255,255,255,0.15)" />
+          </motion.div>
+          <h3 className="pl-empty-title">No plans yet</h3>
+          <p className="pl-empty-sub">Create your first workout plan!</p>
+          <motion.button
+            className="pl-create-first-btn"
+            onClick={() => setShowCreate(true)}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            <Plus size={16} />
+            CREATE PLAN
+          </motion.button>
+        </motion.div>
+      )}
+
+      {/* Plans List */}
+      {!loading && plans.length > 0 && (
+        <div className="pl-list">
           {[...plans]
             .sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0))
-            .map(plan => {
+            .map((plan, idx) => {
               const today = getTodayMuscles(plan)
               const isExpanded = expandedPlan === plan.id
               return (
-                <div
+                <motion.div
                   key={plan.id}
-                  className={`plan-card ${plan.isActive ? 'active' : ''} ${isExpanded ? 'expanded' : ''}`}
+                  className={`pl-card ${plan.isActive ? 'active' : ''}`}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.08 }}
+                  whileHover={{ y: -2 }}
                 >
-                  {/* Header - clickable to expand */}
+                  {/* Top bar */}
+                  <div className={`pl-card-bar ${plan.isActive ? 'active' : ''}`} />
+
+                  {/* Header */}
                   <div
-                    className="plan-card-header"
+                    className="pl-card-header"
                     onClick={() => setExpandedPlan(isExpanded ? null : plan.id)}
                   >
-                    <div>
-                      <h3 className="plan-name">{plan.name}</h3>
+                    <div className="pl-card-header-left">
+                      <h3 className="pl-plan-name">{plan.name}</h3>
                       {plan.isActive && (
-                        <span className="active-badge">● Active</span>
+                        <motion.span
+                          className="pl-active-badge"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 300 }}
+                        >
+                          <Check size={10} /> ACTIVE
+                        </motion.span>
                       )}
                     </div>
-                    <div className="plan-actions" onClick={e => e.stopPropagation()}>
-                      <button className="edit-btn" onClick={() => openEdit(plan)}>Edit</button>
-                      <button className="delete-btn" onClick={() => deletePlan(plan.id)}>Delete</button>
+                    <div className="pl-card-actions" onClick={e => e.stopPropagation()}>
+                      <motion.button
+                        className="pl-edit-btn"
+                        onClick={() => openEdit(plan)}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Pencil size={13} />
+                      </motion.button>
+                      <motion.button
+                        className="pl-delete-btn"
+                        onClick={() => deletePlan(plan.id)}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Trash2 size={13} />
+                      </motion.button>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown size={16} color="rgba(255,255,255,0.3)" />
+                      </motion.div>
                     </div>
                   </div>
 
                   {/* Today's focus */}
-                  <div className="today-focus">
-                    <span className="focus-label">Today →</span>
-                    <div className="focus-content">
+                  <div className="pl-today">
+                    <span className="pl-today-label">TODAY</span>
+                    <div className="pl-today-content">
                       {today.isRest ? (
-                        <span className="focus-rest">Rest Day</span>
+                        <span className="pl-today-rest">Rest Day</span>
                       ) : today.primary ? (
                         <>
-                          <span className="focus-primary">{today.primary}</span>
+                          <span
+                            className="pl-today-primary"
+                            style={{ color: MUSCLE_COLORS[today.primary] || '#FF6B6B' }}
+                          >
+                            {today.primary}
+                          </span>
                           {today.secondary?.length > 0 && (
-                            <span className="focus-secondary">
+                            <span className="pl-today-secondary">
                               + {today.secondary.join(', ')}
                             </span>
                           )}
                         </>
                       ) : (
-                        <span className="focus-empty">Not set</span>
+                        <span className="pl-today-empty">Not set</span>
                       )}
                     </div>
                   </div>
 
-                  {/* Week overview */}
-                  <div className="week-overview">
+                  {/* Week dots */}
+                  <div className="pl-week">
                     {FULL_DAYS.map((day, i) => {
                       const d = plan.schedule?.[day]
-                      const isRest = d?.isRest
-                      const hasWorkout = d?.primary
                       const isToday = todayIndex === i
+                      const color = d?.primary ? MUSCLE_COLORS[d.primary] : null
                       return (
-                        <div key={day} className={`day-dot ${isToday ? 'today' : ''}`}>
-                          <div className={`dot ${isRest ? 'rest' : hasWorkout ? 'active' : 'empty'}`} />
-                          <span className="dot-label">{DAYS[i]}</span>
+                        <div key={day} className={`pl-week-col ${isToday ? 'today' : ''}`}>
+                          <motion.div
+                            className={`pl-dot ${d?.isRest ? 'rest' : d?.primary ? 'has-workout' : 'empty'} ${isToday ? 'today' : ''}`}
+                            style={d?.primary && !d?.isRest ? {
+                              background: `linear-gradient(135deg, ${color}, ${color}88)`,
+                              boxShadow: `0 2px 8px ${color}40`
+                            } : {}}
+                            whileHover={{ scale: 1.2 }}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: i * 0.04, type: 'spring', stiffness: 300 }}
+                          />
+                          <span className="pl-dot-label">{DAYS[i]}</span>
                         </div>
                       )
                     })}
                   </div>
 
                   {/* Expanded Schedule */}
-                  {isExpanded && (
-                    <div className="expanded-schedule">
-                      {FULL_DAYS.map((day, i) => {
-                        const d = plan.schedule?.[day]
-                        const isToday = todayIndex === i
-                        return (
-                          <div key={day} className={`schedule-row ${isToday ? 'today-row' : ''}`}>
-                            <span className="schedule-day">{DAYS[i]}</span>
-                            <div className="schedule-muscles">
-                              {d?.isRest ? (
-                                <span className="schedule-rest">Rest</span>
-                              ) : d?.primary ? (
-                                <>
-                                  <span className="schedule-primary">{d.primary}</span>
-                                  {d.secondary?.length > 0 && (
-                                    <span className="schedule-secondary">
-                                      + {d.secondary.join(', ')}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        className="pl-expanded"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {FULL_DAYS.map((day, i) => {
+                          const d = plan.schedule?.[day]
+                          const isToday = todayIndex === i
+                          const color = d?.primary ? MUSCLE_COLORS[d.primary] : null
+                          return (
+                            <div
+                              key={day}
+                              className={`pl-schedule-row ${isToday ? 'today' : ''}`}
+                            >
+                              <span className="pl-sched-day">{DAYS[i]}</span>
+                              <div className="pl-sched-muscles">
+                                {d?.isRest ? (
+                                  <span className="pl-sched-rest">Rest</span>
+                                ) : d?.primary ? (
+                                  <>
+                                    <span
+                                      className="pl-sched-primary"
+                                      style={{ color: color || '#fff' }}
+                                    >
+                                      {d.primary}
                                     </span>
-                                  )}
-                                </>
-                              ) : (
-                                <span className="schedule-empty">—</span>
-                              )}
+                                    {d.secondary?.length > 0 && (
+                                      <span className="pl-sched-secondary">
+                                        + {d.secondary.join(', ')}
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="pl-sched-empty">—</span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                          )
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Set Active */}
                   {!plan.isActive && (
-                    <button
-                      className="set-active-btn"
+                    <motion.button
+                      className="pl-set-active-btn"
                       onClick={() => setActive(plan.id)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
                     >
-                      Set as Active
-                    </button>
+                      <Zap size={14} />
+                      SET AS ACTIVE
+                    </motion.button>
                   )}
-
-                </div>
+                </motion.div>
               )
             })}
         </div>
