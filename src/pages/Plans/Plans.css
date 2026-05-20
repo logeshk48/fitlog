@@ -619,3 +619,182 @@
   border-color: rgba(34,197,94,0.4);
   box-shadow: 0 4px 16px rgba(34,197,94,0.2);
 }
+/* ================================
+   ACTIVE GLOW EFFECT
+================================ */
+.pl-active-glow {
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(34,197,94,0.15), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ================================
+   MUSCLE COVERAGE BAR
+================================ */
+.pl-coverage {
+  margin-bottom: 12px;
+}
+
+.pl-coverage-bar {
+  display: flex;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 6px;
+  gap: 2px;
+}
+
+.pl-coverage-seg {
+  flex: 1;
+  border-radius: 2px;
+  transform-origin: left;
+}
+
+.pl-coverage-empty-bar {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+}
+
+.pl-coverage-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pl-coverage-stat {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.3);
+  font-weight: 500;
+}
+
+.pl-coverage-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+}
+
+/* ================================
+   DAY PILLS
+================================ */
+.pl-day-pills {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.pl-day-pills::-webkit-scrollbar { display: none; }
+
+.pl-day-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  min-width: 42px;
+  flex-shrink: 0;
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.pl-day-pill.today {
+  border-color: rgba(255,107,107,0.4) !important;
+  box-shadow: 0 0 12px rgba(255,107,107,0.2);
+}
+
+.pl-day-pill.rest {
+  background: rgba(34,197,94,0.05);
+  border-color: rgba(34,197,94,0.15);
+}
+
+.pl-pill-day {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pl-day-pill.today .pl-pill-day {
+  color: #FF6B6B;
+}
+
+.pl-pill-muscle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.25);
+  line-height: 1;
+}
+
+.pl-day-pill.rest .pl-pill-muscle {
+  color: #22C55E;
+  font-size: 0.6rem;
+}
+
+/* ================================
+   QUICK START BUTTON
+================================ */
+.pl-quick-start-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: none;
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pl-quick-secondary {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  opacity: 0.75;
+  letter-spacing: 0.02em;
+}
+
+/* ================================
+   REST DAY INDICATOR
+================================ */
+.pl-rest-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(34,197,94,0.06);
+  border: 1px solid rgba(34,197,94,0.15);
+  margin-bottom: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: #22C55E;
+}
+
+.pl-rest-z {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
