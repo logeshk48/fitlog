@@ -1,9 +1,11 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext, useRef } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 import { db } from '../../firebase'
 import { collection, query, where, getDocs, orderBy, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { auth } from '../../firebase'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { Pencil, LogOut, Bell, ChevronRight, Check, X, Zap } from 'lucide-react'
 import './Profile.css'
 
 const FITNESS_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Elite']
@@ -12,30 +14,204 @@ const EQUIPMENT = ['With Weight', 'Without Weight', 'Both']
 const WORKOUT_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const BADGES = [
-  { id: 'first_workout', icon: '🏋️', label: 'First Workout', desc: 'Completed first workout', req: 1 },
-  { id: 'week_warrior', icon: '⚡', label: 'Week Warrior', desc: '7 workouts completed', req: 7 },
-  { id: 'monthly_beast', icon: '🔥', label: 'Monthly Beast', desc: '30 workouts completed', req: 30 },
-  { id: 'streak_3', icon: '💪', label: 'On Fire', desc: '3 day streak', req: 3, type: 'streak' },
-  { id: 'streak_7', icon: '🌟', label: 'Unstoppable', desc: '7 day streak', req: 7, type: 'streak' },
-  { id: 'heavy_lifter', icon: '🏆', label: 'Heavy Lifter', desc: 'Lifted over 50kg', req: 50, type: 'lift' },
+  { id: 'first_workout', label: 'First Rep', desc: 'Completed first workout', req: 1, color: '#FF6B6B' },
+  { id: 'week_warrior', label: 'Week Warrior', desc: '7 workouts', req: 7, color: '#4ECDC4' },
+  { id: 'monthly_beast', label: 'Monthly Beast', desc: '30 workouts', req: 30, color: '#A855F7' },
+  { id: 'streak_3', label: 'On Fire', desc: '3 day streak', req: 3, type: 'streak', color: '#F97316' },
+  { id: 'streak_7', label: 'Unstoppable', desc: '7 day streak', req: 7, type: 'streak', color: '#FFE66D' },
+  { id: 'heavy_lifter', label: 'Heavy Lifter', desc: 'Lifted 50kg+', req: 50, type: 'lift', color: '#22C55E' },
 ]
 
-function useCounter(target, duration = 1500) {
+// ================================
+// SVG PROGRESS RING
+// ================================
+function ProgressRing({ percent, color = '#FF6B6B', size = 120, stroke = 8, label, value }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true })
+  const radius = (size - stroke) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percent / 100) * circumference
+
+  return (
+    <div ref={ref} className="pf-ring-wrap">
+      <svg width={size} height={size} className="pf-ring-svg">
+        <defs>
+          <linearGradient id={`ring-grad-${color.replace('#','')}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={color} />
+            <stop offset="100%" stopColor={`${color}88`} />
+          </linearGradient>
+        </defs>
+        {/* Track */}
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.05)"
+          strokeWidth={stroke}
+        />
+        {/* Progress */}
+        <motion.circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none"
+          stroke={`url(#ring-grad-${color.replace('#','')})`}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={inView ? { strokeDashoffset: offset } : { strokeDashoffset: circumference }}
+          transition={{ duration: 1.2, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ transform: 'rotate(-90deg)', transformOrigin: 'center', filter: `drop-shadow(0 0 6px ${color}60)` }}
+        />
+      </svg>
+      <div className="pf-ring-label">
+        <motion.span
+          className="pf-ring-value"
+          style={{ color }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={inView ? { opacity: 1, scale: 1 } : {}}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+        >{value}</motion.span>
+        <span className="pf-ring-text">{label}</span>
+      </div>
+    </div>
+  )
+}
+
+// ================================
+// STREAK FLAME SVG
+// ================================
+function StreakFlame({ streak }) {
+  if (streak === 0) return (
+    <div className="pf-flame-wrap">
+      <svg width="32" height="40" viewBox="0 0 32 40">
+        <path d="M16 38 C8 38 4 32 4 26 C4 20 8 16 12 12 C12 18 14 20 16 20 C14 16 16 8 22 4 C22 12 26 16 28 22 C28 30 24 38 16 38Z"
+          fill="rgba(255,255,255,0.1)" />
+      </svg>
+      <span className="pf-flame-count" style={{ color: 'rgba(255,255,255,0.2)' }}>0</span>
+    </div>
+  )
+
+  const intensity = Math.min(streak / 14, 1)
+  const color1 = streak >= 7 ? '#FF3B3B' : streak >= 3 ? '#FF6B6B' : '#FF8E53'
+  const color2 = streak >= 7 ? '#FF6B6B' : '#FFE66D'
+
+  return (
+    <div className="pf-flame-wrap">
+      <motion.svg
+        width="32" height="40" viewBox="0 0 32 40"
+        animate={{ scaleY: [1, 1.05, 1], scaleX: [1, 0.97, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <defs>
+          <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor={color1} />
+            <stop offset="100%" stopColor={color2} />
+          </linearGradient>
+        </defs>
+        <motion.path
+          d="M16 38 C8 38 4 32 4 26 C4 20 8 16 12 12 C12 18 14 20 16 20 C14 16 16 8 22 4 C22 12 26 16 28 22 C28 30 24 38 16 38Z"
+          fill="url(#flameGrad)"
+          filter={`drop-shadow(0 0 ${4 + intensity * 8}px ${color1})`}
+          animate={{ opacity: [0.85, 1, 0.85] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+        {streak >= 3 && (
+          <motion.path
+            d="M16 32 C12 32 10 28 10 25 C10 22 12 20 14 18 C14 21 15 22 16 22 C15 20 16 16 19 14 C19 18 21 20 22 23 C22 27 20 32 16 32Z"
+            fill="rgba(255,255,255,0.3)"
+            animate={{ opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 1.2, repeat: Infinity, delay: 0.3 }}
+          />
+        )}
+      </motion.svg>
+      <motion.span
+        className="pf-flame-count"
+        style={{ color: color1, textShadow: `0 0 12px ${color1}60` }}
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >{streak}</motion.span>
+    </div>
+  )
+}
+
+// ================================
+// BADGE ITEM
+// ================================
+function BadgeItem({ badge, unlocked, index }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true })
+
+  const BADGE_ICONS = {
+    'first_workout': '🏋️',
+    'week_warrior': '⚡',
+    'monthly_beast': '🔥',
+    'streak_3': '💪',
+    'streak_7': '🌟',
+    'heavy_lifter': '🏆',
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      className={`pf-badge ${unlocked ? 'unlocked' : 'locked'}`}
+      style={unlocked ? { '--bc': badge.color } : {}}
+      initial={{ opacity: 0, scale: 0.7 }}
+      animate={inView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ delay: index * 0.08, type: 'spring', stiffness: 260, damping: 20 }}
+      whileTap={{ scale: 0.94 }}
+    >
+      {unlocked && (
+        <motion.div
+          className="pf-badge-glow"
+          style={{ background: `radial-gradient(circle, ${badge.color}30, transparent 70%)` }}
+          animate={{ opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+        />
+      )}
+      <span className="pf-badge-icon">{BADGE_ICONS[badge.id]}</span>
+      <span className="pf-badge-label">{badge.label}</span>
+      {unlocked && (
+        <motion.div
+          className="pf-badge-check"
+          style={{ background: badge.color }}
+          initial={{ scale: 0 }}
+          animate={inView ? { scale: 1 } : {}}
+          transition={{ delay: index * 0.08 + 0.3, type: 'spring', stiffness: 300 }}
+        >
+          <Check size={8} color="white" />
+        </motion.div>
+      )}
+      {!unlocked && <div className="pf-badge-lock">🔒</div>}
+    </motion.div>
+  )
+}
+
+// ================================
+// COUNT UP HOOK
+// ================================
+function useCountUp(target, duration = 1200) {
   const [count, setCount] = useState(0)
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true })
+
   useEffect(() => {
-    if (target === 0) return
+    if (!inView || target === 0) return
     let start = 0
-    const increment = target / (duration / 16)
+    const steps = 60
+    const increment = target / steps
     const timer = setInterval(() => {
       start += increment
       if (start >= target) { setCount(target); clearInterval(timer) }
       else setCount(Math.floor(start))
-    }, 16)
+    }, duration / steps)
     return () => clearInterval(timer)
-  }, [target])
-  return count
+  }, [target, inView])
+
+  return { count, ref }
 }
 
+// ================================
+// MAIN COMPONENT
+// ================================
 function Profile() {
   const { user } = useContext(AuthContext)
   const [profile, setProfile] = useState(null)
@@ -46,8 +222,8 @@ function Profile() {
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
-  const totalCount = useCounter(workoutStats.total)
-  const streakCount = useCounter(workoutStats.streak)
+  const { count: totalCount, ref: totalRef } = useCountUp(workoutStats.total)
+  const { count: liftCount, ref: liftRef } = useCountUp(workoutStats.bestLift)
 
   useEffect(() => { fetchAll() }, [])
 
@@ -55,7 +231,6 @@ function Profile() {
     if (!user) return
     setLoading(true)
     try {
-      // Fetch profile
       const profileRef = doc(db, 'profiles', user.uid)
       const profileSnap = await getDoc(profileRef)
       if (profileSnap.exists()) {
@@ -63,52 +238,31 @@ function Profile() {
         setEditData(profileSnap.data())
       } else {
         const defaultProfile = {
-          name: user.displayName || '',
-          fitnessLevel: 'Beginner',
-          goal: 'Build Muscle',
-          height: '',
-          weight: '',
-          targetWeight: '',
-          age: '',
-          gender: '',
-          equipment: 'Both',
-          preferredDays: [],
-          notifications: true,
+          name: user.displayName || '', fitnessLevel: 'Beginner',
+          goal: 'Build Muscle', height: '', weight: '', targetWeight: '',
+          age: '', gender: '', equipment: 'Both', preferredDays: [], notifications: true,
         }
         setProfile(defaultProfile)
         setEditData(defaultProfile)
       }
 
-      // Fetch workout stats
-      const q = query(
-        collection(db, 'workouts'),
-        where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc')
-      )
+      const q = query(collection(db, 'workouts'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'))
       const snap = await getDocs(q)
       const workouts = snap.docs.map(d => ({ id: d.id, ...d.data() }))
 
       let bestLift = 0
       workouts.forEach(w => {
         w.exercises?.forEach(ex => {
-          ex.sets?.forEach(s => {
-            if (s.weight > bestLift) bestLift = s.weight
-          })
+          ex.sets?.forEach(s => { if (s.weight > bestLift) bestLift = s.weight })
         })
       })
 
-      // Streak
       let streak = 0
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      const today = new Date(); today.setHours(0, 0, 0, 0)
       for (let i = 0; i < 30; i++) {
-        const date = new Date(today)
-        date.setDate(today.getDate() - i)
-        const hasWorkout = workouts.some(w => {
-          const wDate = w.createdAt?.toDate?.() || new Date(w.date)
-          return wDate.toDateString() === date.toDateString()
-        })
-        if (hasWorkout) streak++
+        const date = new Date(today); date.setDate(today.getDate() - i)
+        const has = workouts.some(w => (w.createdAt?.toDate?.() || new Date(w.date)).toDateString() === date.toDateString())
+        if (has) streak++
         else if (i > 0) break
       }
 
@@ -120,22 +274,16 @@ function Profile() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const profileRef = doc(db, 'profiles', user.uid)
-      await setDoc(profileRef, { ...editData, updatedAt: serverTimestamp() }, { merge: true })
+      await setDoc(doc(db, 'profiles', user.uid), { ...editData, updatedAt: serverTimestamp() }, { merge: true })
       setProfile(editData)
       setSaveSuccess(true)
-      setTimeout(() => {
-        setSaveSuccess(false)
-        setShowEdit(false)
-      }, 1500)
+      setTimeout(() => { setSaveSuccess(false); setShowEdit(false) }, 1500)
     } catch (err) { console.error(err) }
     setSaving(false)
   }
 
   const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      await signOut(auth)
-    }
+    if (window.confirm('Are you sure you want to logout?')) await signOut(auth)
   }
 
   const getBMI = () => {
@@ -144,11 +292,7 @@ function Profile() {
     const w = parseFloat(profile.weight)
     if (!h || !w) return null
     const bmi = (w / (h * h)).toFixed(1)
-    let status = ''
-    if (bmi < 18.5) status = 'Underweight'
-    else if (bmi < 25) status = 'Normal'
-    else if (bmi < 30) status = 'Overweight'
-    else status = 'Obese'
+    let status = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'
     return { value: bmi, status }
   }
 
@@ -164,358 +308,446 @@ function Profile() {
     return Math.min(100, (current / target) * 100)
   }
 
-  const getUnlockedBadges = () => {
-    return BADGES.filter(badge => {
-      if (badge.type === 'streak') return workoutStats.streak >= badge.req
-      if (badge.type === 'lift') return workoutStats.bestLift >= badge.req
-      return workoutStats.total >= badge.req
-    })
-  }
+  const getUnlockedBadges = () => BADGES.filter(badge => {
+    if (badge.type === 'streak') return workoutStats.streak >= badge.req
+    if (badge.type === 'lift') return workoutStats.bestLift >= badge.req
+    return workoutStats.total >= badge.req
+  })
 
   const getFirstName = () => profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'Champ'
   const bmi = getBMI()
   const goalProgress = getGoalProgress()
-  const unlockedBadges = getUnlockedBadges()
+
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] }
+  })
 
   if (loading) {
     return (
-      <div className="profile-loading">
-        <div className="profile-loading-avatar">
+      <div className="pf-loading">
+        <motion.div
+          className="pf-loading-avatar"
+          animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 1.4, repeat: Infinity }}
+        >
           {getFirstName()[0]?.toUpperCase() || 'F'}
-        </div>
+        </motion.div>
         <p>Loading profile...</p>
       </div>
     )
   }
 
   return (
-    <div className="profile-page">
+    <div className="pf-page">
 
-      {/* ===== HEADER ===== */}
-      <div className="profile-header animate-1">
-        <div className="profile-avatar-wrap">
-          {user?.photoURL ? (
-            <img src={user.photoURL} alt="avatar" className="profile-avatar" />
-          ) : (
-            <div className="profile-avatar-placeholder">
-              {getFirstName()[0]?.toUpperCase()}
+      {/* ===== HERO HEADER ===== */}
+      <motion.div className="pf-hero" {...fadeUp(0)}>
+        <div className="pf-hero-bg" />
+
+        {/* Avatar + Ring */}
+        <div className="pf-avatar-section">
+          <div className="pf-avatar-ring-wrap">
+            <svg className="pf-avatar-ring-svg" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="50" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
+              <motion.circle
+                cx="55" cy="55" r="50"
+                fill="none"
+                stroke="url(#avatarRingGrad)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 50}`}
+                initial={{ strokeDashoffset: `${2 * Math.PI * 50}` }}
+                animate={{ strokeDashoffset: `${2 * Math.PI * 50 * (1 - Math.min(workoutStats.total / 50, 1))}` }}
+                transition={{ duration: 1.5, delay: 0.3, ease: 'easeOut' }}
+                style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+              />
+              <defs>
+                <linearGradient id="avatarRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FF6B6B" />
+                  <stop offset="100%" stopColor="#4ECDC4" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="pf-avatar-inner">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="avatar" className="pf-avatar-img" />
+              ) : (
+                <div className="pf-avatar-placeholder">
+                  {getFirstName()[0]?.toUpperCase()}
+                </div>
+              )}
             </div>
-          )}
-          <div className="profile-level-badge">
-            {profile?.fitnessLevel || 'Beginner'}
+            <motion.div
+              className="pf-level-badge"
+              initial={{ scale: 0, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ delay: 0.5, type: 'spring', stiffness: 300 }}
+            >
+              {profile?.fitnessLevel || 'Beginner'}
+            </motion.div>
           </div>
         </div>
-        <div className="profile-identity">
-          <h1 className="profile-name">{profile?.name || user?.displayName || 'Athlete'}</h1>
-          <p className="profile-goal-tag">{profile?.goal || 'Build Muscle'}</p>
-          <p className="profile-email">{user?.email}</p>
-        </div>
-        <button className="edit-profile-btn" onClick={() => setShowEdit(true)}>
-          Edit
-        </button>
-      </div>
+
+        {/* Identity */}
+        <motion.div className="pf-identity" {...fadeUp(0.15)}>
+          <h1 className="pf-name">{getFirstName().toUpperCase()}</h1>
+          <div className="pf-goal-tag">{profile?.goal || 'Build Muscle'}</div>
+          <p className="pf-email">{user?.email}</p>
+        </motion.div>
+
+        {/* Edit button */}
+        <motion.button
+          className="pf-edit-btn"
+          onClick={() => setShowEdit(true)}
+          whileTap={{ scale: 0.92 }}
+          {...fadeUp(0.2)}
+        >
+          <Pencil size={14} />
+          EDIT
+        </motion.button>
+      </motion.div>
 
       {/* ===== QUICK STATS ===== */}
-      <div className="profile-stats animate-2">
-        <div className="profile-stat">
-          <span className="profile-stat-value">{totalCount}</span>
-          <span className="profile-stat-label">Workouts</span>
+      <motion.div className="pf-stats-row" {...fadeUp(0.1)}>
+        <div className="pf-stat" ref={totalRef}>
+          <motion.span
+            className="pf-stat-val"
+            key={totalCount}
+          >{totalCount}</motion.span>
+          <span className="pf-stat-lbl">WORKOUTS</span>
         </div>
-        <div className="profile-stat-divider" />
-        <div className="profile-stat">
-          <span className="profile-stat-value">{streakCount}🔥</span>
-          <span className="profile-stat-label">Streak</span>
+        <div className="pf-stat-sep" />
+        <div className="pf-stat">
+          <StreakFlame streak={workoutStats.streak} />
+          <span className="pf-stat-lbl">STREAK</span>
         </div>
-        <div className="profile-stat-divider" />
-        <div className="profile-stat">
-          <span className="profile-stat-value">{workoutStats.bestLift}kg</span>
-          <span className="profile-stat-label">Best Lift</span>
+        <div className="pf-stat-sep" />
+        <div className="pf-stat" ref={liftRef}>
+          <motion.span className="pf-stat-val">{liftCount}kg</motion.span>
+          <span className="pf-stat-lbl">BEST LIFT</span>
         </div>
-      </div>
+      </motion.div>
+
+      {/* ===== PROGRESS RINGS ===== */}
+      {(profile?.weight || goalProgress > 0) && (
+        <motion.div className="pf-rings-card" {...fadeUp(0.2)}>
+          <p className="pf-card-title">PROGRESS</p>
+          <div className="pf-rings-row">
+            <ProgressRing
+              percent={Math.min((workoutStats.total / 50) * 100, 100)}
+              color="#FF6B6B"
+              value={workoutStats.total}
+              label="Workouts"
+            />
+            <ProgressRing
+              percent={Math.min((workoutStats.streak / 7) * 100, 100)}
+              color="#FFE66D"
+              value={`${workoutStats.streak}d`}
+              label="Streak"
+            />
+            <ProgressRing
+              percent={goalProgress}
+              color="#4ECDC4"
+              value={`${Math.round(goalProgress)}%`}
+              label="Goal"
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* ===== BODY SUMMARY ===== */}
-      <div className="section-card animate-3">
-        <h3 className="section-card-title">Body Summary</h3>
-        <div className="body-grid">
-          <div className="body-item">
-            <span className="body-value">{profile?.height || '—'}</span>
-            <span className="body-label">Height (cm)</span>
-          </div>
-          <div className="body-item">
-            <span className="body-value">{profile?.weight || '—'}</span>
-            <span className="body-label">Weight (kg)</span>
-          </div>
-          <div className="body-item">
-            <span className="body-value">{profile?.age || '—'}</span>
-            <span className="body-label">Age</span>
-          </div>
-          <div className="body-item">
-            <span className="body-value">{profile?.targetWeight || '—'}</span>
-            <span className="body-label">Target (kg)</span>
-          </div>
+      <motion.div className="pf-card" {...fadeUp(0.25)}>
+        <p className="pf-card-title">BODY SUMMARY</p>
+        <div className="pf-body-grid">
+          {[
+            { val: profile?.height || '—', lbl: 'Height cm' },
+            { val: profile?.weight || '—', lbl: 'Weight kg' },
+            { val: profile?.age || '—', lbl: 'Age' },
+            { val: profile?.targetWeight || '—', lbl: 'Target kg' },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              className="pf-body-item"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.06 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              <span className="pf-body-val">{item.val}</span>
+              <span className="pf-body-lbl">{item.lbl}</span>
+            </motion.div>
+          ))}
         </div>
 
-        {/* BMI Card */}
+        {/* BMI */}
         {bmi && (
-          <div className={`bmi-card ${bmi.status.toLowerCase()}`}>
-            <div className="bmi-left">
-              <span className="bmi-label">BMI</span>
-              <span className="bmi-value">{bmi.value}</span>
+          <motion.div
+            className={`pf-bmi ${bmi.status.toLowerCase()}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="pf-bmi-left">
+              <span className="pf-bmi-lbl">BMI</span>
+              <span className="pf-bmi-val">{bmi.value}</span>
             </div>
-            <span className="bmi-status">{bmi.status}</span>
-          </div>
+            <span className="pf-bmi-status">{bmi.status}</span>
+          </motion.div>
         )}
 
-        {/* Goal Progress */}
+        {/* Goal Progress Bar */}
         {profile?.targetWeight && profile?.weight && (
-          <div className="goal-progress">
-            <div className="goal-progress-header">
-              <span className="goal-progress-label">Goal Progress</span>
-              <span className="goal-progress-percent">{Math.round(goalProgress)}%</span>
+          <div className="pf-goal-prog">
+            <div className="pf-goal-prog-top">
+              <span className="pf-goal-prog-lbl">GOAL PROGRESS</span>
+              <span className="pf-goal-prog-pct">{Math.round(goalProgress)}%</span>
             </div>
-            <div className="goal-progress-track">
-              <div
-                className="goal-progress-fill"
-                style={{ width: `${goalProgress}%` }}
+            <div className="pf-goal-prog-track">
+              <motion.div
+                className="pf-goal-prog-fill"
+                initial={{ width: 0 }}
+                animate={{ width: `${goalProgress}%` }}
+                transition={{ duration: 1.2, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
               />
             </div>
-            <p className="goal-progress-text">
-              {profile.weight}kg → {profile.targetWeight}kg
-            </p>
+            <p className="pf-goal-prog-text">{profile.weight}kg → {profile.targetWeight}kg</p>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* ===== ACHIEVEMENTS ===== */}
-      <div className="section-card animate-4">
-        <h3 className="section-card-title">Achievements</h3>
-        <div className="badges-grid">
-          {BADGES.map(badge => {
-            const unlocked = getUnlockedBadges().find(b => b.id === badge.id)
-            return (
-              <div key={badge.id} className={`badge-item ${unlocked ? 'unlocked' : 'locked'}`}>
-                <div className="badge-icon">{badge.icon}</div>
-                <span className="badge-label">{badge.label}</span>
-                {!unlocked && <div className="badge-lock">🔒</div>}
-              </div>
-            )
+      <motion.div className="pf-card" {...fadeUp(0.3)}>
+        <p className="pf-card-title">ACHIEVEMENTS</p>
+        <div className="pf-badges-grid">
+          {BADGES.map((badge, i) => {
+            const unlocked = !!getUnlockedBadges().find(b => b.id === badge.id)
+            return <BadgeItem key={badge.id} badge={badge} unlocked={unlocked} index={i} />
           })}
         </div>
-      </div>
+      </motion.div>
 
       {/* ===== PREFERENCES ===== */}
-      <div className="section-card animate-5">
-        <h3 className="section-card-title">Preferences</h3>
-
-        <div className="pref-row">
-          <span className="pref-label">Equipment</span>
-          <span className="pref-value">{profile?.equipment || 'Both'}</span>
-        </div>
-
-        <div className="pref-row">
-          <span className="pref-label">Fitness Level</span>
-          <span className="pref-value">{profile?.fitnessLevel || 'Beginner'}</span>
-        </div>
-
-        <div className="pref-row">
-          <span className="pref-label">Preferred Days</span>
-          <div className="pref-days">
+      <motion.div className="pf-card" {...fadeUp(0.35)}>
+        <p className="pf-card-title">PREFERENCES</p>
+        {[
+          { label: 'Equipment', value: profile?.equipment || 'Both' },
+          { label: 'Fitness Level', value: profile?.fitnessLevel || 'Beginner' },
+        ].map((item, i) => (
+          <div key={i} className="pf-pref-row">
+            <span className="pf-pref-lbl">{item.label}</span>
+            <span className="pf-pref-val">{item.value}</span>
+          </div>
+        ))}
+        <div className="pf-pref-row">
+          <span className="pf-pref-lbl">Preferred Days</span>
+          <div className="pf-pref-days">
             {WORKOUT_DAYS.map(day => (
-              <span
-                key={day}
-                className={`pref-day ${profile?.preferredDays?.includes(day) ? 'active' : ''}`}
-              >
+              <span key={day} className={`pf-pref-day ${profile?.preferredDays?.includes(day) ? 'active' : ''}`}>
                 {day}
               </span>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ===== SETTINGS ===== */}
-      <div className="section-card animate-6">
-        <h3 className="section-card-title">Settings</h3>
+      <motion.div className="pf-card" {...fadeUp(0.4)}>
+        <p className="pf-card-title">SETTINGS</p>
 
-        <div className="settings-row">
-          <div className="settings-row-left">
-            <span className="settings-icon">🔔</span>
-            <span className="settings-label">Notifications</span>
+        {/* Notifications toggle */}
+        <div className="pf-settings-row">
+          <div className="pf-settings-left">
+            <div className="pf-settings-icon-wrap"><Bell size={15} /></div>
+            <span className="pf-settings-lbl">Notifications</span>
           </div>
-          <div
-            className={`toggle ${profile?.notifications ? 'on' : 'off'}`}
+          <motion.div
+            className={`pf-toggle ${profile?.notifications ? 'on' : 'off'}`}
             onClick={() => {
               const updated = { ...profile, notifications: !profile?.notifications }
-              setProfile(updated)
-              setEditData(updated)
+              setProfile(updated); setEditData(updated)
             }}
+            whileTap={{ scale: 0.95 }}
           >
-            <div className="toggle-thumb" />
-          </div>
+            <motion.div
+              className="pf-toggle-thumb"
+              animate={{ x: profile?.notifications ? 20 : 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            />
+          </motion.div>
         </div>
 
-        <div className="settings-row" onClick={() => setShowEdit(true)}>
-          <div className="settings-row-left">
-            <span className="settings-icon">👤</span>
-            <span className="settings-label">Edit Profile</span>
+        {/* Edit Profile */}
+        <motion.div
+          className="pf-settings-row"
+          onClick={() => setShowEdit(true)}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="pf-settings-left">
+            <div className="pf-settings-icon-wrap"><Pencil size={15} /></div>
+            <span className="pf-settings-lbl">Edit Profile</span>
           </div>
-          <span className="settings-arrow">›</span>
-        </div>
+          <ChevronRight size={16} color="rgba(255,255,255,0.25)" />
+        </motion.div>
 
-        <div className="settings-row danger" onClick={handleLogout}>
-          <div className="settings-row-left">
-            <span className="settings-icon">🚪</span>
-            <span className="settings-label">Logout</span>
+        {/* Logout */}
+        <motion.div
+          className="pf-settings-row danger"
+          onClick={handleLogout}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="pf-settings-left">
+            <div className="pf-settings-icon-wrap danger"><LogOut size={15} /></div>
+            <span className="pf-settings-lbl danger">Logout</span>
           </div>
-          <span className="settings-arrow">›</span>
-        </div>
-      </div>
+          <ChevronRight size={16} color="rgba(255,107,107,0.4)" />
+        </motion.div>
+      </motion.div>
 
       {/* ===== EDIT BOTTOM SHEET ===== */}
-      {showEdit && (
-        <div className="edit-overlay" onClick={() => setShowEdit(false)}>
-          <div className="edit-sheet" onClick={e => e.stopPropagation()}>
+      <AnimatePresence>
+        {showEdit && (
+          <motion.div
+            className="pf-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowEdit(false)}
+          >
+            <motion.div
+              className="pf-sheet"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 32 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="pf-sheet-handle" />
 
-            <div className="edit-sheet-handle" />
-
-            <div className="edit-sheet-header">
-              <h3>Edit Profile</h3>
-              <button className="edit-close-btn" onClick={() => setShowEdit(false)}>✕</button>
-            </div>
-
-            <div className="edit-form">
-
-              <div className="edit-field">
-                <label>Name</label>
-                <input
-                  type="text"
-                  value={editData.name || ''}
-                  onChange={e => setEditData({ ...editData, name: e.target.value })}
-                  placeholder="Your name"
-                />
+              <div className="pf-sheet-header">
+                <h3 className="pf-sheet-title">EDIT PROFILE</h3>
+                <motion.button
+                  className="pf-sheet-close"
+                  onClick={() => setShowEdit(false)}
+                  whileTap={{ scale: 0.88 }}
+                >
+                  <X size={14} />
+                </motion.button>
               </div>
 
-              <div className="edit-field">
-                <label>Fitness Level</label>
-                <div className="edit-options">
-                  {FITNESS_LEVELS.map(level => (
-                    <button
-                      key={level}
-                      className={`edit-option ${editData.fitnessLevel === level ? 'active' : ''}`}
-                      onClick={() => setEditData({ ...editData, fitnessLevel: level })}
-                    >
-                      {level}
-                    </button>
-                  ))}
+              <div className="pf-form">
+
+                <div className="pf-field">
+                  <label>Name</label>
+                  <input type="text" value={editData.name || ''} onChange={e => setEditData({ ...editData, name: e.target.value })} placeholder="Your name" />
                 </div>
+
+                <div className="pf-field">
+                  <label>Fitness Level</label>
+                  <div className="pf-options">
+                    {FITNESS_LEVELS.map(level => (
+                      <motion.button
+                        key={level}
+                        className={`pf-option ${editData.fitnessLevel === level ? 'active' : ''}`}
+                        onClick={() => setEditData({ ...editData, fitnessLevel: level })}
+                        whileTap={{ scale: 0.92 }}
+                      >{level}</motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pf-field">
+                  <label>Main Goal</label>
+                  <div className="pf-options">
+                    {GOALS.map(goal => (
+                      <motion.button
+                        key={goal}
+                        className={`pf-option ${editData.goal === goal ? 'active' : ''}`}
+                        onClick={() => setEditData({ ...editData, goal: goal })}
+                        whileTap={{ scale: 0.92 }}
+                      >{goal}</motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pf-field-row">
+                  <div className="pf-field">
+                    <label>Height (cm)</label>
+                    <input type="number" value={editData.height || ''} onChange={e => setEditData({ ...editData, height: e.target.value })} placeholder="170" />
+                  </div>
+                  <div className="pf-field">
+                    <label>Weight (kg)</label>
+                    <input type="number" value={editData.weight || ''} onChange={e => setEditData({ ...editData, weight: e.target.value })} placeholder="70" />
+                  </div>
+                </div>
+
+                <div className="pf-field-row">
+                  <div className="pf-field">
+                    <label>Age</label>
+                    <input type="number" value={editData.age || ''} onChange={e => setEditData({ ...editData, age: e.target.value })} placeholder="25" />
+                  </div>
+                  <div className="pf-field">
+                    <label>Target Weight (kg)</label>
+                    <input type="number" value={editData.targetWeight || ''} onChange={e => setEditData({ ...editData, targetWeight: e.target.value })} placeholder="65" />
+                  </div>
+                </div>
+
+                <div className="pf-field">
+                  <label>Equipment</label>
+                  <div className="pf-options">
+                    {EQUIPMENT.map(eq => (
+                      <motion.button
+                        key={eq}
+                        className={`pf-option ${editData.equipment === eq ? 'active' : ''}`}
+                        onClick={() => setEditData({ ...editData, equipment: eq })}
+                        whileTap={{ scale: 0.92 }}
+                      >{eq}</motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pf-field">
+                  <label>Preferred Days</label>
+                  <div className="pf-days">
+                    {WORKOUT_DAYS.map(day => (
+                      <motion.button
+                        key={day}
+                        className={`pf-day ${editData.preferredDays?.includes(day) ? 'active' : ''}`}
+                        onClick={() => {
+                          const days = editData.preferredDays || []
+                          setEditData({
+                            ...editData,
+                            preferredDays: days.includes(day) ? days.filter(d => d !== day) : [...days, day]
+                          })
+                        }}
+                        whileTap={{ scale: 0.9 }}
+                      >{day}</motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                <motion.button
+                  className={`pf-save-btn ${saveSuccess ? 'success' : ''}`}
+                  onClick={handleSave}
+                  disabled={saving}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {saving ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                      <Zap size={16} />
+                    </motion.div>
+                  ) : saveSuccess ? (
+                    <><Check size={16} /> SAVED!</>
+                  ) : 'SAVE CHANGES'}
+                </motion.button>
+
               </div>
-
-              <div className="edit-field">
-                <label>Main Goal</label>
-                <div className="edit-options">
-                  {GOALS.map(goal => (
-                    <button
-                      key={goal}
-                      className={`edit-option ${editData.goal === goal ? 'active' : ''}`}
-                      onClick={() => setEditData({ ...editData, goal: goal })}
-                    >
-                      {goal}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="edit-row">
-                <div className="edit-field">
-                  <label>Height (cm)</label>
-                  <input
-                    type="number"
-                    value={editData.height || ''}
-                    onChange={e => setEditData({ ...editData, height: e.target.value })}
-                    placeholder="170"
-                  />
-                </div>
-                <div className="edit-field">
-                  <label>Weight (kg)</label>
-                  <input
-                    type="number"
-                    value={editData.weight || ''}
-                    onChange={e => setEditData({ ...editData, weight: e.target.value })}
-                    placeholder="70"
-                  />
-                </div>
-              </div>
-
-              <div className="edit-row">
-                <div className="edit-field">
-                  <label>Age</label>
-                  <input
-                    type="number"
-                    value={editData.age || ''}
-                    onChange={e => setEditData({ ...editData, age: e.target.value })}
-                    placeholder="25"
-                  />
-                </div>
-                <div className="edit-field">
-                  <label>Target Weight (kg)</label>
-                  <input
-                    type="number"
-                    value={editData.targetWeight || ''}
-                    onChange={e => setEditData({ ...editData, targetWeight: e.target.value })}
-                    placeholder="65"
-                  />
-                </div>
-              </div>
-
-              <div className="edit-field">
-                <label>Equipment</label>
-                <div className="edit-options">
-                  {EQUIPMENT.map(eq => (
-                    <button
-                      key={eq}
-                      className={`edit-option ${editData.equipment === eq ? 'active' : ''}`}
-                      onClick={() => setEditData({ ...editData, equipment: eq })}
-                    >
-                      {eq}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="edit-field">
-                <label>Preferred Days</label>
-                <div className="edit-days">
-                  {WORKOUT_DAYS.map(day => (
-                    <button
-                      key={day}
-                      className={`edit-day ${editData.preferredDays?.includes(day) ? 'active' : ''}`}
-                      onClick={() => {
-                        const days = editData.preferredDays || []
-                        setEditData({
-                          ...editData,
-                          preferredDays: days.includes(day)
-                            ? days.filter(d => d !== day)
-                            : [...days, day]
-                        })
-                      }}
-                    >
-                      {day}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                className={`save-profile-btn ${saveSuccess ? 'success' : ''}`}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save Changes'}
-              </button>
-
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   )
