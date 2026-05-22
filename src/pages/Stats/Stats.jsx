@@ -380,7 +380,7 @@ function Stats() {
               {/* Stat Cards */}
               <div className="st-stat-grid">
                 <StatCard value={overview.total} label="Total Workouts" color="#FF6B6B" icon={<BarChart2 size={16} />} index={0} />
-                <StatCard value={Math.round(overview.totalVolume / 1000 * 10) / 10} label="Total Volume (t)" color="#4ECDC4" icon={<TrendingUp size={16} />} index={1} suffix="t" />
+                <StatCard value={overview.totalVolume} label="Total Volume" color="#4ECDC4" icon={<TrendingUp size={16} />} index={1} suffix="kg" />
                 <StatCard value={overview.bestLift} label="Best Lift" color="#A855F7" icon={<Trophy size={16} />} index={2} suffix="kg" />
                 <StatCard value={overview.avgPerWeek} label="Avg / Week" color="#F97316" icon={<Zap size={16} />} index={3} />
                 <StatCard value={overview.currentStreak} label="Streak" color="#FF6B6B" icon={<Flame size={16} />} index={4} />
