@@ -13,6 +13,18 @@ const GOALS = ['Build Muscle', 'Lose Weight', 'Stay Fit', 'Improve Strength', 'I
 const EQUIPMENT = ['With Weight', 'Without Weight', 'Both']
 const WORKOUT_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+const AVATARS = [
+  { id: 'felix', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix' },
+  { id: 'aneka', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aneka' },
+  { id: 'mia', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Mia' },
+  { id: 'jake', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Jake' },
+  { id: 'sara', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sara' },
+  { id: 'alex', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Alex' },
+  { id: 'luna', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Luna' },
+  { id: 'max', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Max' },
+  { id: 'zoe', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Zoe' },
+]
+
 const BADGES = [
   { id: 'first_workout', label: 'First Rep', desc: 'Completed first workout', req: 1, color: '#FF6B6B' },
   { id: 'week_warrior', label: 'Week Warrior', desc: '7 workouts', req: 7, color: '#4ECDC4' },
@@ -36,23 +48,16 @@ function ProgressRing({ percent, color = '#FF6B6B', size = 120, stroke = 8, labe
     <div ref={ref} className="pf-ring-wrap">
       <svg width={size} height={size} className="pf-ring-svg">
         <defs>
-          <linearGradient id={`ring-grad-${color.replace('#','')}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`ring-grad-${color.replace('#', '')}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={color} />
             <stop offset="100%" stopColor={`${color}88`} />
           </linearGradient>
         </defs>
-        {/* Track */}
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none"
-          stroke="rgba(255,255,255,0.05)"
-          strokeWidth={stroke}
-        />
-        {/* Progress */}
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} />
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius}
           fill="none"
-          stroke={`url(#ring-grad-${color.replace('#','')})`}
+          stroke={`url(#ring-grad-${color.replace('#', '')})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -186,30 +191,6 @@ function BadgeItem({ badge, unlocked, index }) {
 }
 
 // ================================
-// COUNT UP HOOK
-// ================================
-function useCountUp(target, duration = 1200) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true })
-
-  useEffect(() => {
-    if (!inView || target === 0) return
-    let start = 0
-    const steps = 60
-    const increment = target / steps
-    const timer = setInterval(() => {
-      start += increment
-      if (start >= target) { setCount(target); clearInterval(timer) }
-      else setCount(Math.floor(start))
-    }, duration / steps)
-    return () => clearInterval(timer)
-  }, [target, inView])
-
-  return { count, ref }
-}
-
-// ================================
 // MAIN COMPONENT
 // ================================
 function Profile() {
@@ -221,9 +202,6 @@ function Profile() {
   const [editData, setEditData] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
-
-  const { count: totalCount, ref: totalRef } = useCountUp(workoutStats.total)
-  const { count: liftCount, ref: liftRef } = useCountUp(workoutStats.bestLift)
 
   useEffect(() => { fetchAll() }, [])
 
@@ -240,13 +218,18 @@ function Profile() {
         const defaultProfile = {
           name: user.displayName || '', fitnessLevel: 'Beginner',
           goal: 'Build Muscle', height: '', weight: '', targetWeight: '',
-          age: '', gender: '', equipment: 'Both', preferredDays: [], notifications: true,
+          age: '', gender: '', equipment: 'Both', preferredDays: [],
+          notifications: true, avatarId: '',
         }
         setProfile(defaultProfile)
         setEditData(defaultProfile)
       }
 
-      const q = query(collection(db, 'workouts'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'))
+      const q = query(
+        collection(db, 'workouts'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      )
       const snap = await getDocs(q)
       const workouts = snap.docs.map(d => ({ id: d.id, ...d.data() }))
 
@@ -261,7 +244,9 @@ function Profile() {
       const today = new Date(); today.setHours(0, 0, 0, 0)
       for (let i = 0; i < 30; i++) {
         const date = new Date(today); date.setDate(today.getDate() - i)
-        const has = workouts.some(w => (w.createdAt?.toDate?.() || new Date(w.date)).toDateString() === date.toDateString())
+        const has = workouts.some(w =>
+          (w.createdAt?.toDate?.() || new Date(w.date)).toDateString() === date.toDateString()
+        )
         if (has) streak++
         else if (i > 0) break
       }
@@ -274,7 +259,11 @@ function Profile() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await setDoc(doc(db, 'profiles', user.uid), { ...editData, updatedAt: serverTimestamp() }, { merge: true })
+      await setDoc(
+        doc(db, 'profiles', user.uid),
+        { ...editData, updatedAt: serverTimestamp() },
+        { merge: true }
+      )
       setProfile(editData)
       setSaveSuccess(true)
       setTimeout(() => { setSaveSuccess(false); setShowEdit(false) }, 1500)
@@ -292,7 +281,7 @@ function Profile() {
     const w = parseFloat(profile.weight)
     if (!h || !w) return null
     const bmi = (w / (h * h)).toFixed(1)
-    let status = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'
+    const status = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'
     return { value: bmi, status }
   }
 
@@ -314,7 +303,11 @@ function Profile() {
     return workoutStats.total >= badge.req
   })
 
-  const getFirstName = () => profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'Champ'
+  const getFirstName = () =>
+    profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'Champ'
+
+  const getAvatarUrl = (id) => AVATARS.find(a => a.id === id)?.url
+
   const bmi = getBMI()
   const goalProgress = getGoalProgress()
 
@@ -342,14 +335,19 @@ function Profile() {
   return (
     <div className="pf-page">
 
-      {/* ===== HERO HEADER ===== */}
+      {/* ===== HERO ===== */}
       <motion.div className="pf-hero" {...fadeUp(0)}>
         <div className="pf-hero-bg" />
 
-        {/* Avatar + Ring */}
         <div className="pf-avatar-section">
           <div className="pf-avatar-ring-wrap">
             <svg className="pf-avatar-ring-svg" viewBox="0 0 110 110">
+              <defs>
+                <linearGradient id="avatarRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FF6B6B" />
+                  <stop offset="100%" stopColor="#4ECDC4" />
+                </linearGradient>
+              </defs>
               <circle cx="55" cy="55" r="50" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
               <motion.circle
                 cx="55" cy="55" r="50"
@@ -363,15 +361,16 @@ function Profile() {
                 transition={{ duration: 1.5, delay: 0.3, ease: 'easeOut' }}
                 style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
               />
-              <defs>
-                <linearGradient id="avatarRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FF6B6B" />
-                  <stop offset="100%" stopColor="#4ECDC4" />
-                </linearGradient>
-              </defs>
             </svg>
             <div className="pf-avatar-inner">
-              {user?.photoURL ? (
+              {/* ✅ DiceBear avatar or Google photo or letter */}
+              {profile?.avatarId ? (
+                <img
+                  src={getAvatarUrl(profile.avatarId)}
+                  alt="avatar"
+                  className="pf-avatar-img"
+                />
+              ) : user?.photoURL ? (
                 <img src={user.photoURL} alt="avatar" className="pf-avatar-img" />
               ) : (
                 <div className="pf-avatar-placeholder">
@@ -390,14 +389,12 @@ function Profile() {
           </div>
         </div>
 
-        {/* Identity */}
         <motion.div className="pf-identity" {...fadeUp(0.15)}>
           <h1 className="pf-name">{getFirstName().toUpperCase()}</h1>
           <div className="pf-goal-tag">{profile?.goal || 'Build Muscle'}</div>
           <p className="pf-email">{user?.email}</p>
         </motion.div>
 
-        {/* Edit button */}
         <motion.button
           className="pf-edit-btn"
           onClick={() => setShowEdit(true)}
@@ -411,11 +408,8 @@ function Profile() {
 
       {/* ===== QUICK STATS ===== */}
       <motion.div className="pf-stats-row" {...fadeUp(0.1)}>
-        <div className="pf-stat" ref={totalRef}>
-          <motion.span
-            className="pf-stat-val"
-            key={totalCount}
-          >{totalCount}</motion.span>
+        <div className="pf-stat">
+          <span className="pf-stat-val">{workoutStats.total}</span>
           <span className="pf-stat-lbl">WORKOUTS</span>
         </div>
         <div className="pf-stat-sep" />
@@ -424,8 +418,8 @@ function Profile() {
           <span className="pf-stat-lbl">STREAK</span>
         </div>
         <div className="pf-stat-sep" />
-        <div className="pf-stat" ref={liftRef}>
-          <motion.span className="pf-stat-val">{liftCount}kg</motion.span>
+        <div className="pf-stat">
+          <span className="pf-stat-val">{workoutStats.bestLift}kg</span>
           <span className="pf-stat-lbl">BEST LIFT</span>
         </div>
       </motion.div>
@@ -481,7 +475,6 @@ function Profile() {
           ))}
         </div>
 
-        {/* BMI */}
         {bmi && (
           <motion.div
             className={`pf-bmi ${bmi.status.toLowerCase()}`}
@@ -497,7 +490,6 @@ function Profile() {
           </motion.div>
         )}
 
-        {/* Goal Progress Bar */}
         {profile?.targetWeight && profile?.weight && (
           <div className="pf-goal-prog">
             <div className="pf-goal-prog-top">
@@ -544,7 +536,10 @@ function Profile() {
           <span className="pf-pref-lbl">Preferred Days</span>
           <div className="pf-pref-days">
             {WORKOUT_DAYS.map(day => (
-              <span key={day} className={`pf-pref-day ${profile?.preferredDays?.includes(day) ? 'active' : ''}`}>
+              <span
+                key={day}
+                className={`pf-pref-day ${profile?.preferredDays?.includes(day) ? 'active' : ''}`}
+              >
                 {day}
               </span>
             ))}
@@ -556,7 +551,6 @@ function Profile() {
       <motion.div className="pf-card" {...fadeUp(0.4)}>
         <p className="pf-card-title">SETTINGS</p>
 
-        {/* Notifications toggle */}
         <div className="pf-settings-row">
           <div className="pf-settings-left">
             <div className="pf-settings-icon-wrap"><Bell size={15} /></div>
@@ -566,7 +560,8 @@ function Profile() {
             className={`pf-toggle ${profile?.notifications ? 'on' : 'off'}`}
             onClick={() => {
               const updated = { ...profile, notifications: !profile?.notifications }
-              setProfile(updated); setEditData(updated)
+              setProfile(updated)
+              setEditData(updated)
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -578,7 +573,6 @@ function Profile() {
           </motion.div>
         </div>
 
-        {/* Edit Profile */}
         <motion.div
           className="pf-settings-row"
           onClick={() => setShowEdit(true)}
@@ -591,7 +585,6 @@ function Profile() {
           <ChevronRight size={16} color="rgba(255,255,255,0.25)" />
         </motion.div>
 
-        {/* Logout */}
         <motion.div
           className="pf-settings-row danger"
           onClick={handleLogout}
@@ -638,11 +631,50 @@ function Profile() {
 
               <div className="pf-form">
 
+                {/* ✅ AVATAR PICKER */}
                 <div className="pf-field">
-                  <label>Name</label>
-                  <input type="text" value={editData.name || ''} onChange={e => setEditData({ ...editData, name: e.target.value })} placeholder="Your name" />
+                  <label>Choose Avatar</label>
+                  <div className="pf-avatar-picker">
+                    {AVATARS.map(avatar => (
+                      <motion.div
+                        key={avatar.id}
+                        className={`pf-avatar-option ${editData.avatarId === avatar.id ? 'selected' : ''}`}
+                        onClick={() => setEditData({ ...editData, avatarId: avatar.id })}
+                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.08 }}
+                      >
+                        <img
+                          src={avatar.url}
+                          alt={avatar.id}
+                          className="pf-avatar-option-img"
+                        />
+                        {editData.avatarId === avatar.id && (
+                          <motion.div
+                            className="pf-avatar-option-check"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 300 }}
+                          >
+                            <Check size={10} color="white" />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
 
+                {/* NAME */}
+                <div className="pf-field">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    value={editData.name || ''}
+                    onChange={e => setEditData({ ...editData, name: e.target.value })}
+                    placeholder="Your name"
+                  />
+                </div>
+
+                {/* FITNESS LEVEL */}
                 <div className="pf-field">
                   <label>Fitness Level</label>
                   <div className="pf-options">
@@ -657,6 +689,7 @@ function Profile() {
                   </div>
                 </div>
 
+                {/* GOAL */}
                 <div className="pf-field">
                   <label>Main Goal</label>
                   <div className="pf-options">
@@ -671,28 +704,51 @@ function Profile() {
                   </div>
                 </div>
 
+                {/* HEIGHT & WEIGHT */}
                 <div className="pf-field-row">
                   <div className="pf-field">
                     <label>Height (cm)</label>
-                    <input type="number" value={editData.height || ''} onChange={e => setEditData({ ...editData, height: e.target.value })} placeholder="170" />
+                    <input
+                      type="number"
+                      value={editData.height || ''}
+                      onChange={e => setEditData({ ...editData, height: e.target.value })}
+                      placeholder="170"
+                    />
                   </div>
                   <div className="pf-field">
                     <label>Weight (kg)</label>
-                    <input type="number" value={editData.weight || ''} onChange={e => setEditData({ ...editData, weight: e.target.value })} placeholder="70" />
+                    <input
+                      type="number"
+                      value={editData.weight || ''}
+                      onChange={e => setEditData({ ...editData, weight: e.target.value })}
+                      placeholder="70"
+                    />
                   </div>
                 </div>
 
+                {/* AGE & TARGET */}
                 <div className="pf-field-row">
                   <div className="pf-field">
                     <label>Age</label>
-                    <input type="number" value={editData.age || ''} onChange={e => setEditData({ ...editData, age: e.target.value })} placeholder="25" />
+                    <input
+                      type="number"
+                      value={editData.age || ''}
+                      onChange={e => setEditData({ ...editData, age: e.target.value })}
+                      placeholder="25"
+                    />
                   </div>
                   <div className="pf-field">
                     <label>Target Weight (kg)</label>
-                    <input type="number" value={editData.targetWeight || ''} onChange={e => setEditData({ ...editData, targetWeight: e.target.value })} placeholder="65" />
+                    <input
+                      type="number"
+                      value={editData.targetWeight || ''}
+                      onChange={e => setEditData({ ...editData, targetWeight: e.target.value })}
+                      placeholder="65"
+                    />
                   </div>
                 </div>
 
+                {/* EQUIPMENT */}
                 <div className="pf-field">
                   <label>Equipment</label>
                   <div className="pf-options">
@@ -707,6 +763,7 @@ function Profile() {
                   </div>
                 </div>
 
+                {/* PREFERRED DAYS */}
                 <div className="pf-field">
                   <label>Preferred Days</label>
                   <div className="pf-days">
@@ -718,7 +775,9 @@ function Profile() {
                           const days = editData.preferredDays || []
                           setEditData({
                             ...editData,
-                            preferredDays: days.includes(day) ? days.filter(d => d !== day) : [...days, day]
+                            preferredDays: days.includes(day)
+                              ? days.filter(d => d !== day)
+                              : [...days, day]
                           })
                         }}
                         whileTap={{ scale: 0.9 }}
@@ -727,6 +786,7 @@ function Profile() {
                   </div>
                 </div>
 
+                {/* SAVE */}
                 <motion.button
                   className={`pf-save-btn ${saveSuccess ? 'success' : ''}`}
                   onClick={handleSave}
@@ -735,7 +795,10 @@ function Profile() {
                   whileTap={{ scale: 0.97 }}
                 >
                   {saving ? (
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    >
                       <Zap size={16} />
                     </motion.div>
                   ) : saveSuccess ? (
