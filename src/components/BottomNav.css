@@ -1,30 +1,25 @@
 /* ================================
-   BOTTOM NAV CONTAINER
+   BOTTOM NAV
 ================================ */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 75px;
-  background: rgba(12, 12, 18, 0.92);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  height: 72px;
+  background: rgba(10, 10, 18, 0.94);
+  border-top: 1px solid rgba(255,255,255,0.05);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 12px;
+  padding: 0 8px;
   z-index: 100;
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
-  box-shadow: 0 -1px 0 rgba(255,255,255,0.03),
-              0 -20px 60px rgba(0, 0, 0, 0.6);
-  border-radius: 28px 28px 0 0;
-  animation: navSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes navSlideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,0.03),
+    0 -20px 60px rgba(0,0,0,0.6);
+  border-radius: 24px 24px 0 0;
 }
 
 /* ================================
@@ -35,119 +30,91 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 10px 0;
-  border-radius: 20px;
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-  text-decoration: none;
+  gap: 4px;
+  padding: 8px 4px;
   flex: 1;
   position: relative;
+  text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Glow background on active */
-.nav-item::after {
-  content: '';
-  position: absolute;
-  inset: 6px 6px;
+  cursor: pointer;
   border-radius: 16px;
-  background: transparent;
-  transition: all 0.35s ease;
-  z-index: -1;
 }
 
-.nav-item.active::after {
-  background: rgba(255, 107, 107, 0.1);
-  box-shadow: 0 0 20px rgba(255, 107, 107, 0.08);
+/* ================================
+   ACTIVE BACKGROUND PILL
+================================ */
+.nav-active-bg {
+  position: absolute;
+  inset: 4px 6px;
+  border-radius: 14px;
+  background: rgba(255,107,107,0.1);
+  border: 1px solid rgba(255,107,107,0.12);
+  z-index: 0;
 }
 
-/* Top indicator bar */
-.nav-item::before {
-  content: '';
+/* ================================
+   TOP DOT INDICATOR
+================================ */
+.nav-dot {
   position: absolute;
   top: -1px;
-  left: 50%;
-  transform: translateX(-50%) scaleX(0);
-  width: 28px;
+  width: 24px;
   height: 3px;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 4px 4px;
   background: linear-gradient(90deg, #FF6B6B, #FF8E53);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
-}
-
-.nav-item.active::before {
-  transform: translateX(-50%) scaleX(1);
+  box-shadow: 0 0 10px rgba(255,107,107,0.7);
+  transform-origin: center;
 }
 
 /* ================================
    ICON
 ================================ */
 .nav-icon {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.2);
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: rgba(255,255,255,0.22);
+  position: relative;
+  z-index: 1;
+  transition: color 0.25s ease;
 }
 
 .nav-icon svg {
-  width: 26px;
-  height: 26px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+}
+
+.nav-item.active .nav-icon {
+  color: #FF6B6B;
+  filter: drop-shadow(0 0 8px rgba(255,107,107,0.6));
 }
 
 /* ================================
    LABEL
 ================================ */
 .nav-label {
-  font-size: 0.58rem;
   font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.2);
-  transition: all 0.35s ease;
-  letter-spacing: 0.07em;
+  font-size: 0.56rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-/* ================================
-   ACTIVE STATE
-================================ */
-.nav-item.active .nav-icon {
-  color: #FF6B6B;
-  transform: translateY(-4px) scale(1.2);
-  filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.7));
+  position: relative;
+  z-index: 1;
+  transition: color 0.25s ease;
 }
 
 .nav-item.active .nav-label {
   color: #FF6B6B;
-  font-weight: 700;
-  transform: translateY(-2px);
-  text-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+  text-shadow: 0 0 10px rgba(255,107,107,0.5);
 }
 
 /* ================================
-   HOVER
-================================ */
-.nav-item:hover:not(.active) .nav-icon {
-  color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px) scale(1.08);
-}
-
-.nav-item:hover:not(.active) .nav-label {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-/* ================================
-   PRESS
+   PRESS FEEDBACK
 ================================ */
 .nav-item:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
