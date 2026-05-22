@@ -1,8 +1,11 @@
 import logo from '../../assets/logo.svg'
+import authBg from '../../assets/auth-bg.jpg'
 import { useState } from 'react'
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '../../firebase'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mail, Lock, User, AlertCircle } from 'lucide-react'
 import './Login.css'
 
 const googleProvider = new GoogleAuthProvider()
@@ -54,32 +57,46 @@ function Signup() {
     <div className="auth-page">
 
       {/* Background */}
-      <div className="auth-bg">
-        <div className="auth-blob blob1" />
-        <div className="auth-blob blob2" />
-        <div className="auth-blob blob3" />
-      </div>
+      <div
+        className="auth-bg"
+        style={{ backgroundImage: `url(${authBg})` }}
+      />
+      <div className="auth-bg-overlay" />
 
       {/* Content */}
       <div className="auth-content">
 
         {/* Logo */}
-        <div className="auth-logo">
-          <img src={logo} alt="FitLog" className="auth-logo-img"/>
-
-        </div>
+        <motion.div
+          className="auth-logo"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <img src={logo} alt="FitLog" className="auth-logo-img" />
+        </motion.div>
 
         {/* Heading */}
-        <div className="auth-heading">
+        <motion.div
+          className="auth-heading"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           <h1>Create account</h1>
           <p>Start tracking your fitness journey.</p>
-        </div>
+        </motion.div>
 
         {/* Google Button */}
-        <button
+        <motion.button
           className="google-btn"
           onClick={handleGoogle}
           disabled={googleLoading}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          whileTap={{ scale: 0.97 }}
+          whileHover={{ scale: 1.01 }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -88,68 +105,103 @@ function Signup() {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           {googleLoading ? 'Signing in...' : 'Continue with Google'}
-        </button>
+        </motion.button>
 
         {/* Divider */}
-        <div className="auth-divider">
+        <motion.div
+          className="auth-divider"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <span>or</span>
-        </div>
+        </motion.div>
 
         {/* Form */}
-        <form className="auth-form" onSubmit={handleSignup}>
-
-          {error && (
-            <div className="auth-error">{error}</div>
-          )}
+        <motion.form
+          className="auth-form"
+          onSubmit={handleSignup}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                className="auth-error"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <AlertCircle size={14} />
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="auth-field">
             <label>Name</label>
-            <input
-              type="text"
-              placeholder="Your name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-            />
+            <div className="auth-input-wrap">
+              <User size={16} className="auth-input-icon" />
+              <input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="auth-field">
             <label>Email</label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
+            <div className="auth-input-wrap">
+              <Mail size={16} className="auth-input-icon" />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="auth-field">
             <label>Password</label>
-            <input
-              type="password"
-              placeholder="Min. 6 characters"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
+            <div className="auth-input-wrap">
+              <Lock size={16} className="auth-input-icon" />
+              <input
+                type="password"
+                placeholder="Min. 6 characters"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <button
+          <motion.button
             type="submit"
             className="auth-btn"
             disabled={loading}
+            whileHover={{ scale: 1.02, boxShadow: '0 12px 32px rgba(255,107,107,0.5)' }}
+            whileTap={{ scale: 0.97 }}
           >
             {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-
-        </form>
+          </motion.button>
+        </motion.form>
 
         {/* Footer */}
-        <p className="auth-footer">
+        <motion.p
+          className="auth-footer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
           Already have an account?{' '}
           <Link to="/login" className="auth-link">Sign In</Link>
-        </p>
+        </motion.p>
 
       </div>
     </div>
